@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="az">
 <head>
   <meta charset="utf-8">
@@ -1086,25 +1086,51 @@
     }
 
     .protocol-body {
+      display: block;
+    }
+
+    .protocol-nav {
       display: flex;
-      flex-direction: column;
-      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
-    #scheduleArea {
-      order: 1;
+    .protocol-view-tabs {
+      display: inline-flex;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
     }
 
-    #standingsArea {
-      order: 2;
+    .protocol-view-tabs button {
+      min-height: 36px;
+      padding: 0 12px;
+      background: transparent;
+      color: var(--blue);
+      box-shadow: none;
     }
 
-    #athleteTable {
-      order: 3;
+    .protocol-view-tabs button.active {
+      background: var(--blue);
+      color: #fff;
     }
 
-    .protocol-gap {
-      display: none;
+    .protocol-print-action {
+      min-height: 38px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--blue);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 18px rgba(8,40,90,0.08);
+    }
+
+    .protocol-section[hidden] {
+      display: none !important;
     }
 
     .round-card {
@@ -1151,6 +1177,18 @@
       display: none;
     }
 
+    .print-weight-sheet {
+      display: none;
+    }
+
+    .print-bracket-title {
+      display: none;
+    }
+
+    .print-bracket-sheet {
+      display: none;
+    }
+
     @media (min-width: 720px) {
       main { padding: 24px 18px 48px; }
       .home-grid { grid-template-columns: repeat(2, minmax(0, 240px)); }
@@ -1161,9 +1199,6 @@
       .competition-row { grid-template-columns: 1fr auto; align-items: center; }
       .desktop-table { display: block; overflow-x: auto; }
       .mobile-list, .round-cards { display: none; }
-      #athleteTable { order: 1; }
-      #scheduleArea { order: 2; }
-      #standingsArea { order: 3; }
       .bracket-wrap { overflow-x: auto; }
       .bracket {
         min-width: max-content;
@@ -1206,6 +1241,13 @@
       main { width: 100%; padding: 0; }
       .screen { display: none !important; }
       .screen.print-target { display: block !important; }
+      body.print-grid #protocolScreen {
+        page: bracket-sheet;
+      }
+      @page bracket-sheet {
+        size: A4;
+        margin: 4mm;
+      }
       .panel, .protocol-header {
         box-shadow: none;
         border: 0;
@@ -1215,11 +1257,285 @@
       .panel-head { border: 0; padding: 0 0 8px; }
       .panel-body { padding: 0; }
       .bracket-wrap { overflow: visible; }
-      .view-toggle, .round-jump, .bracket, .bracket-connectors { display: none !important; }
-      .compact-view {
+      .view-toggle, .round-jump { display: none !important; }
+      body.print-compact .bracket,
+      body.print-compact .bracket-connectors {
+        display: none !important;
+      }
+      body.print-compact .protocol-nav,
+      body.print-compact #athleteTable,
+      body.print-compact #repechageArea,
+      body.print-compact #standingsArea {
+        display: none !important;
+      }
+      body.print-compact #scheduleArea,
+      body.print-compact #scheduleArea[hidden] {
+        display: block !important;
+      }
+      body.print-compact .compact-view {
         display: block !important;
         border: 0;
         margin-top: 8px;
+      }
+      body.print-grid .compact-view,
+      body.print-grid .print-bracket-title,
+      body.print-grid .bracket,
+      body.print-grid .bracket-connectors,
+      body.print-grid #repechageArea,
+      body.print-grid #standingsArea {
+        display: none !important;
+      }
+      body.print-grid .print-bracket-sheet {
+        display: block !important;
+        width: 100%;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      body.print-grid .print-bracket-sheet svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 288mm;
+      }
+      body.print-grid .protocol-header,
+      body.print-grid #protocolContent > .panel > .panel-head,
+      body.print-grid .protocol-nav,
+      body.print-grid #athleteTable,
+      body.print-grid .protocol-gap {
+        display: none !important;
+      }
+      body.print-list #scheduleArea,
+      body.print-list #repechageArea,
+      body.print-list #standingsArea,
+      body.print-list .protocol-nav {
+        display: none !important;
+      }
+      body.print-list #athleteTable,
+      body.print-list #athleteTable[hidden] {
+        display: block !important;
+      }
+      body.print-results #athleteTable,
+      body.print-results #scheduleArea,
+      body.print-results #repechageArea,
+      body.print-results .protocol-nav {
+        display: none !important;
+      }
+      body.print-results #standingsArea,
+      body.print-results #standingsArea[hidden] {
+        display: block !important;
+      }
+      body.print-grid .protocol-body {
+        display: grid;
+        grid-template-columns: 1fr 1.22fr;
+        gap: 10px 12px;
+      }
+      body.print-grid .bracket-wrap {
+        overflow: visible !important;
+      }
+      body.print-grid #scheduleArea {
+        grid-column: 1 / -1;
+        break-before: auto;
+        page-break-before: auto;
+      }
+      body.print-grid .print-bracket-title {
+        display: grid;
+        grid-template-columns: 120px 1fr 120px;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+        color: #000;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body.print-grid .print-bracket-logo {
+        height: 66px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      body.print-grid .print-bracket-logo img {
+        max-width: 100%;
+        max-height: 66px;
+        object-fit: contain;
+      }
+      body.print-grid .print-bracket-title-text {
+        display: grid;
+        gap: 6px;
+      }
+      body.print-grid .print-bracket-title strong {
+        display: block;
+        border: 1px solid #222;
+        padding: 4px 8px;
+        font-size: 17px;
+        line-height: 1.1;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        text-align: center;
+      }
+      body.print-grid .print-bracket-title span {
+        display: block;
+        border: 1px solid #222;
+        padding: 4px 8px;
+        font-size: 14px;
+        line-height: 1.1;
+        letter-spacing: 4px;
+        font-weight: 800;
+        text-align: center;
+        text-transform: uppercase;
+      }
+      body.print-grid .print-bracket-title .print-weight-box {
+        justify-self: center;
+        min-width: 96px;
+        border: 1px solid #222;
+        padding: 10px 12px;
+        font-size: 18px;
+        font-weight: 800;
+        text-align: center;
+      }
+      body.print-grid .bracket {
+        display: grid !important;
+        grid-auto-columns: 204px;
+        gap: 12px;
+        zoom: 0.76;
+        padding-right: 0;
+      }
+      body.print-grid .bracket-connectors {
+        display: block !important;
+      }
+      body.print-grid .round h4 {
+        min-height: 22px;
+        padding: 0 8px;
+        border-width: 1px;
+        font-size: 12px;
+        letter-spacing: 3px;
+        color: #000;
+        background: #fff;
+      }
+      body.print-grid .round-body {
+        --round-step: 36px !important;
+        min-height: calc(var(--round-count, 1) * var(--round-step, 36px));
+      }
+      body.print-grid .round:nth-of-type(2) .round-body { --round-step: 72px !important; }
+      body.print-grid .round:nth-of-type(3) .round-body { --round-step: 144px !important; }
+      body.print-grid .round:nth-of-type(4) .round-body { --round-step: 288px !important; }
+      body.print-grid .round:nth-of-type(5) .round-body { --round-step: 576px !important; }
+      body.print-grid .match {
+        height: 32px;
+        grid-template-rows: 14px 14px;
+        gap: 0;
+        padding: 2px;
+        border-width: 1px;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      body.print-grid .match .meta {
+        display: none;
+      }
+      body.print-grid .match .pair {
+        min-height: 14px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 18px;
+        gap: 2px;
+        align-items: stretch;
+      }
+      body.print-grid .match .pair span {
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 8.5px;
+        line-height: 13px;
+      }
+      body.print-grid .match input {
+        width: 18px;
+        min-height: 13px;
+        height: 13px;
+        padding: 0;
+        border: 1px solid #222;
+        border-radius: 0;
+        font-size: 9px;
+        background: #fff;
+      }
+      body.print-grid .match-draw {
+        min-width: auto;
+        padding: 0 2px;
+        background: transparent;
+        font-size: 9px;
+      }
+      body.print-grid #repechageArea {
+        grid-column: 1;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      body.print-grid #standingsArea {
+        grid-column: 2;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      body.print-grid .repechage {
+        margin: 0;
+        padding: 8px;
+        border: 2px solid #222;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      body.print-grid .repechage h3 {
+        display: none;
+      }
+      body.print-grid .repechage-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      body.print-grid .repechage-box {
+        display: grid;
+        gap: 5px;
+      }
+      body.print-grid .repechage-box .weight-title {
+        border: 1px solid #222;
+        border-radius: 0;
+        padding: 4px;
+        background: #fff;
+        color: #000;
+        font-size: 9px;
+      }
+      body.print-grid .repechage .match {
+        height: 32px;
+        border-width: 1px;
+        grid-template-rows: 14px 14px;
+      }
+      body.print-grid #standingsArea table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      body.print-grid #standingsArea th,
+      body.print-grid #standingsArea td {
+        border: 1px solid #222;
+        padding: 5px 6px;
+        height: 25px;
+      }
+      body.print-grid #standingsArea th {
+        background: #80827f;
+        color: #fff;
+        font-size: 13px;
+      }
+      body.print-grid #standingsArea th:nth-child(2),
+      body.print-grid #standingsArea th:nth-child(5),
+      body.print-grid #standingsArea th:nth-child(6),
+      body.print-grid #standingsArea td:nth-child(2),
+      body.print-grid #standingsArea td:nth-child(5),
+      body.print-grid #standingsArea td:nth-child(6) {
+        display: none;
+      }
+      body.print-grid .print-bracket-title,
+      body.print-grid .bracket,
+      body.print-grid .bracket-connectors,
+      body.print-grid #repechageArea,
+      body.print-grid #standingsArea {
+        display: none !important;
+      }
+      body.print-grid .print-bracket-sheet {
+        display: block !important;
       }
       .compact-round {
         display: grid !important;
@@ -1230,6 +1546,145 @@
       .compact-list {
         padding: 0;
         gap: 6px;
+      }
+      #weightScreen .panel-head,
+      #weightScreen .protocol-header,
+      #weightScreen .weight-section > .weight-title,
+      #weightScreen .weight-section > .athlete-row,
+      #weightScreen .weight-section > .empty {
+        display: none !important;
+      }
+      .weight-section.print-new-page {
+        break-before: page !important;
+        page-break-before: always !important;
+      }
+      .weight-section {
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+      .weight-section > .weight-title {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+      .weight-section .athlete-row {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .print-weight-sheet {
+        display: block;
+        color: #111;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .print-weight-top {
+        display: grid;
+        grid-template-columns: 130px 1fr 130px;
+        align-items: start;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .print-logo-fila,
+      .print-logo-agf {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 10px;
+      }
+      .print-logo-fila img,
+      .print-logo-agf img {
+        display: block;
+        max-width: 100%;
+        max-height: 82px;
+        object-fit: contain;
+      }
+      .print-weight-heading {
+        text-align: center;
+        font-weight: 800;
+      }
+      .print-weight-heading h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        line-height: 1.1;
+        letter-spacing: 0;
+      }
+      .print-weight-heading h2 {
+        margin: 0 0 6px;
+        font-size: 21px;
+        line-height: 1.15;
+        letter-spacing: 6px;
+      }
+      .print-weight-heading .weight-line {
+        font-size: 18px;
+      }
+      .print-form-lines {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+      .print-line {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: end;
+        gap: 6px;
+      }
+      .print-line span,
+      .print-small-line span {
+        border-bottom: 1px solid #111;
+        min-height: 22px;
+        padding: 0 8px 2px;
+      }
+      .print-small-lines {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 220px;
+        margin: 0 0 5px;
+      }
+      .print-small-line {
+        display: grid;
+        grid-template-rows: 24px 14px;
+        text-align: center;
+        font-size: 12px;
+        font-style: italic;
+      }
+      .print-weight-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 14px;
+      }
+      .print-weight-table th,
+      .print-weight-table td {
+        border: 1px solid #222;
+        height: 29px;
+        padding: 4px 6px;
+        vertical-align: middle;
+      }
+      .print-weight-table th {
+        background: #12a4cb;
+        color: #000;
+        text-align: center;
+        font-weight: 800;
+      }
+      .print-weight-table .col-n,
+      .print-weight-table .col-draw,
+      .print-weight-table .col-order {
+        background: #12a4cb;
+        text-align: center;
+        font-weight: 800;
+      }
+      .print-weight-table .col-name {
+        width: 36%;
+      }
+      .print-weight-table .col-club {
+        width: 17%;
+      }
+      .print-weight-table .col-year {
+        width: 14%;
+        text-align: center;
+      }
+      .print-weight-table .col-note {
+        width: 12%;
       }
       .desktop-table { display: block !important; overflow: visible; }
       .mobile-list, .round-cards { display: none !important; }
@@ -1425,6 +1880,7 @@
       activeWeight: null,
       activeRoundIndex: 0,
       bracketView: 'grid',
+      protocolView: 'flow',
       drawCard: null,
       screen: 'home',
       history: [],
@@ -1432,6 +1888,8 @@
       draggedEntry: null,
       selectedEntry: null
     };
+
+    let pendingScoreFocus = null;
 
     const $ = (id) => document.getElementById(id);
 
@@ -1691,6 +2149,57 @@
       return '';
     }
 
+    function printWeightSheetHtml(comp, weight, athletes) {
+      const rowCount = Math.max(18, athletes.length);
+      const rows = Array.from({ length: rowCount }, (_, index) => athletes[index] || null);
+      return `
+        <div class="print-weight-sheet">
+          <div class="print-weight-top">
+            <div class="print-logo-fila" aria-hidden="true"><img src="./logo1.webp" alt=""></div>
+            <div class="print-weight-heading">
+              <h1>AZƏRBAYCAN GÜLƏŞ FEDERASİYASI</h1>
+              <h2>ÇƏKİ PROTOKOLU</h2>
+              <div class="weight-line">Çəki <span>${weight}</span> kq</div>
+            </div>
+            <div class="print-logo-agf" aria-hidden="true"><img src="./agf.webp" alt=""></div>
+          </div>
+          <div class="print-form-lines">
+            <label class="print-line">Yarışın adı <span>${escapeHtml(comp.name)}</span></label>
+          </div>
+          <div class="print-small-lines">
+            <label class="print-small-line"><span>${formatDate(comp.date)}</span><em>tarix</em></label>
+            <label class="print-small-line"><span>${escapeHtml(comp.city)}</span><em>şəhər</em></label>
+          </div>
+          <table class="print-weight-table">
+            <thead>
+              <tr>
+                <th class="col-n">N</th>
+                <th class="col-draw">Püşk<br>N-si</th>
+                <th class="col-order">Yarış<br>N-si</th>
+                <th class="col-name">Adı və Soyadı</th>
+                <th class="col-club">Klub</th>
+                <th class="col-year">Doğulduğu il</th>
+                <th class="col-note">Qeyd</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((athlete, index) => `
+                <tr>
+                  <td class="col-n">${index + 1}</td>
+                  <td>${athlete?.draw || ''}</td>
+                  <td></td>
+                  <td>${athlete ? escapeHtml(athlete.name) : ''}</td>
+                  <td>${athlete ? escapeHtml(athlete.club) : ''}</td>
+                  <td class="col-year">${athlete ? escapeHtml(athlete.yob || '') : ''}</td>
+                  <td></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
     function renderWeightProtocol() {
       const comp = currentCompetition();
       if (!comp) return;
@@ -1698,15 +2207,16 @@
       const groups = groupedAthletes(comp);
       const root = $('weightGroups');
       root.innerHTML = '';
-      comp.weights.forEach((weight) => {
+      comp.weights.forEach((weight, index) => {
         const section = document.createElement('section');
-        section.className = 'weight-section';
+        section.className = `weight-section${index ? ' print-new-page' : ''}`;
         const athletes = groups[weight] || [];
         section.innerHTML = `
           <div class="weight-title">
             <span>${weight} kg</span>
             <span class="count">${athletes.length} iştirakçı</span>
           </div>
+          ${printWeightSheetHtml(comp, weight, athletes)}
         `;
         if (!athletes.length) {
           section.innerHTML += '<div class="empty">Bu çəkidə iştirakçı yoxdur.</div>';
@@ -1912,6 +2422,7 @@
         tab.addEventListener('click', () => {
           state.activeWeight = weight;
           state.activeRoundIndex = 0;
+          state.protocolView = 'flow';
           $('protocolFacts').innerHTML = factsHtml(comp, state.activeWeight);
           renderProtocolTabs();
           renderProtocolContent();
@@ -1939,21 +2450,95 @@
             <span class="count">${athletes.length} iştirakçı</span>
           </div>
           <div class="panel-body protocol-body">
-            <div id="athleteTable"></div>
-            <div class="protocol-gap"></div>
-            <div id="scheduleArea"></div>
-            <div class="protocol-gap"></div>
-            <div id="standingsArea"></div>
+            <div class="protocol-nav no-print">
+              <div class="protocol-view-tabs" role="tablist" aria-label="Protokol bölmələri">
+                <button class="${state.protocolView === 'list' ? 'active' : ''}" data-protocol-view="list">Siyahı</button>
+                <button class="${state.protocolView === 'flow' ? 'active' : ''}" data-protocol-view="flow">YARIŞIN GEDİŞİ</button>
+                <button class="${state.protocolView === 'results' ? 'active' : ''}" data-protocol-view="results">Nəticə</button>
+              </div>
+              <button class="protocol-print-action" data-print-active type="button">Çap et</button>
+            </div>
+            <div id="athleteTable" class="protocol-section" data-protocol-section="list"></div>
+            <div id="scheduleArea" class="protocol-section" data-protocol-section="flow"></div>
+            <div id="repechageArea" class="protocol-section" data-protocol-section="flow"></div>
+            <div id="standingsArea" class="protocol-section" data-protocol-section="results"></div>
           </div>
         </div>
       `;
       renderAthleteTable(athletes);
       if (athletes.length <= 5) {
         renderRoundRobin(athletes);
+        $('repechageArea').innerHTML = '';
       } else {
         renderBracket(athletes, size);
       }
       renderStandings(athletes);
+      bindProtocolViewTabs();
+      applyProtocolView();
+      restoreScoreFocus();
+    }
+
+    function bindProtocolViewTabs() {
+      document.querySelectorAll('[data-protocol-view]').forEach((button) => {
+        button.addEventListener('click', () => {
+          state.protocolView = button.dataset.protocolView;
+          applyProtocolView();
+          if (state.protocolView === 'flow' && state.bracketView === 'grid') {
+            requestAnimationFrame(drawBracketConnectors);
+          }
+        });
+      });
+      document.querySelectorAll('[data-print-active]').forEach((button) => {
+        button.addEventListener('click', printActiveProtocolView);
+      });
+    }
+
+    function applyProtocolView() {
+      document.querySelectorAll('[data-protocol-view]').forEach((button) => {
+        button.classList.toggle('active', button.dataset.protocolView === state.protocolView);
+      });
+      document.querySelectorAll('[data-protocol-section]').forEach((section) => {
+        section.hidden = section.dataset.protocolSection !== state.protocolView;
+      });
+    }
+
+    function printActiveProtocolView() {
+      window.print();
+    }
+
+    function rememberScoreFocus(input) {
+      pendingScoreFocus = {
+        match: input.dataset.match,
+        side: input.dataset.side,
+        start: input.selectionStart,
+        end: input.selectionEnd,
+        scrollX: window.scrollX,
+        scrollY: window.scrollY
+      };
+    }
+
+    function restoreScoreFocus() {
+      if (!pendingScoreFocus) return;
+      const focus = pendingScoreFocus;
+      pendingScoreFocus = null;
+      requestAnimationFrame(() => {
+        window.scrollTo(focus.scrollX, focus.scrollY);
+        const selector = `[data-match="${cssEscape(focus.match)}"][data-side="${cssEscape(focus.side)}"]`;
+        const input = document.querySelector(selector);
+        if (!input) return;
+        input.focus({ preventScroll: true });
+        if (typeof input.setSelectionRange === 'function') {
+          const length = input.value.length;
+          const start = Math.min(focus.start ?? length, length);
+          const end = Math.min(focus.end ?? start, length);
+          input.setSelectionRange(start, end);
+        }
+      });
+    }
+
+    function cssEscape(value) {
+      if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(String(value));
+      return String(value).replace(/["\\]/g, '\\$&');
     }
 
     function orderForBracket(athletes) {
@@ -1971,6 +2556,511 @@
       if (count <= 8) return 8;
       if (count <= 16) return 16;
       return 32;
+    }
+
+    function shortSvgText(value, limit = 28) {
+      const text = String(value || '');
+      return escapeHtml(text.length > limit ? `${text.slice(0, limit - 1)}.` : text);
+    }
+
+    function printScoreBox(x, y, label, value) {
+      return `<rect x="${x}" y="${y}" width="14" height="5" fill="#fff" stroke="#111"/><text x="${x + 7}" y="${y + 4.1}" text-anchor="middle" font-size="4.4" font-weight="700">${label || escapeHtml(value || '')}</text>`;
+    }
+
+    function printScoreGrid(x, y, height, p1 = '', p2 = '') {
+      const half = height / 2;
+      const cellW = 16;
+      return `
+        <rect x="${x}" y="${y}" width="${cellW}" height="${half}" fill="#fff" stroke="#111"/>
+        <rect x="${x + cellW}" y="${y}" width="${cellW}" height="${half}" fill="#fff" stroke="#111"/>
+        <rect x="${x}" y="${y + half}" width="${cellW}" height="${half}" fill="#fff" stroke="#111"/>
+        <rect x="${x + cellW}" y="${y + half}" width="${cellW}" height="${half}" fill="#fff" stroke="#111"/>
+        <text x="${x + cellW / 2}" y="${y + half - 2}" text-anchor="middle" font-size="5.2" font-weight="700">P1</text>
+        <text x="${x + cellW + cellW / 2}" y="${y + half - 2}" text-anchor="middle" font-size="5.2" font-weight="700">P2</text>
+        <text x="${x + cellW / 2}" y="${y + height - 2}" text-anchor="middle" font-size="6" font-weight="700">${escapeHtml(p1 || '')}</text>
+        <text x="${x + cellW + cellW / 2}" y="${y + height - 2}" text-anchor="middle" font-size="6" font-weight="700">${escapeHtml(p2 || '')}</text>
+      `;
+    }
+
+    function printBracketMatchSvg(match, x, y, width, height, colorA = '#f00', colorB = '#0584c7') {
+      const rowGap = width > 160 ? 4 : 3;
+      const row = (height - rowGap) / 2;
+      const y2 = y + row + rowGap;
+      const scoreX = x + width - 28;
+      const splitX = Math.max(x + 45, x + width - 86);
+      const showNames = width > 160;
+      const a = isAthlete(match.a) ? match.a : null;
+      const b = isAthlete(match.b) ? match.b : null;
+      const aName = a ? `№${a.draw || ''} ${a.name}` : '';
+      const bName = b ? `№${b.draw || ''} ${b.name}` : '';
+      return `
+        <g>
+          <rect x="${x}" y="${y}" width="${width}" height="${row}" fill="#fff" stroke="#111" stroke-width="1.2"/>
+          <rect x="${x}" y="${y2}" width="${width}" height="${row}" fill="#fff" stroke="#111" stroke-width="1.2"/>
+          <rect x="${x + 18}" y="${y}" width="18" height="${row}" fill="${a ? colorA : '#fff'}" stroke="#111"/>
+          <rect x="${x + 18}" y="${y2}" width="18" height="${row}" fill="${b ? colorB : '#fff'}" stroke="#111"/>
+          <line x1="${splitX}" y1="${y}" x2="${splitX}" y2="${y + row}" stroke="#111"/>
+          <line x1="${splitX}" y1="${y2}" x2="${splitX}" y2="${y2 + row}" stroke="#111"/>
+          ${showNames ? `<text x="${x + 24}" y="${y + row - 3}" font-size="8" font-weight="700">${shortSvgText(aName, 34)}</text>` : ''}
+          ${showNames ? `<text x="${x + 24}" y="${y2 + row - 3}" font-size="8" font-weight="700">${shortSvgText(bName, 34)}</text>` : ''}
+          ${showNames && a ? `<text x="${splitX + 4}" y="${y + row - 3}" font-size="7">${shortSvgText(a.club, 12)}</text>` : ''}
+          ${showNames && b ? `<text x="${splitX + 4}" y="${y2 + row - 3}" font-size="7">${shortSvgText(b.club, 12)}</text>` : ''}
+          ${printScoreBox(scoreX, y, 'P1', '')}${printScoreBox(scoreX + 14, y, 'P2', '')}
+          ${printScoreBox(scoreX, y2, '', match.result.p1)}${printScoreBox(scoreX + 14, y2, '', match.result.p2)}
+        </g>
+      `;
+    }
+
+    function printQualificationPairSvg(match, x, y, width, height, colorA = '#f00', colorB = '#0584c7') {
+      const rowGap = 2;
+      const row = (height - rowGap) / 2;
+      const secondY = y + row + rowGap;
+      const scoreX = x + width - 34;
+      const nameSplit = x + width - 206;
+      const clubSplit = x + width - 76;
+      const a = isAthlete(match.a) ? match.a : null;
+      const b = isAthlete(match.b) ? match.b : null;
+      const rowSvg = (athlete, rowY, color, scoreValue) => `
+        <rect x="${x}" y="${rowY}" width="${width}" height="${row}" fill="#fff" stroke="#111" stroke-width="1.1"/>
+        <rect x="${x + 42}" y="${rowY}" width="38" height="${row}" fill="${athlete ? color : '#fff'}" stroke="#111" stroke-width="0.9"/>
+        <line x1="${nameSplit}" y1="${rowY}" x2="${nameSplit}" y2="${rowY + row}" stroke="#111" stroke-width="0.9"/>
+        <line x1="${clubSplit}" y1="${rowY}" x2="${clubSplit}" y2="${rowY + row}" stroke="#111" stroke-width="0.9"/>
+        <text x="${x + 84}" y="${rowY + row - 5}" font-size="8" font-weight="700">${shortSvgText(athlete ? `№${athlete.draw || ''} ${athlete.name}` : '', 34)}</text>
+        <text x="${nameSplit + 5}" y="${rowY + row - 5}" font-size="7">${shortSvgText(athlete?.club || '', 14)}</text>
+        ${printScoreBox(scoreX, rowY, 'P1', '')}${printScoreBox(scoreX + 14, rowY, 'P2', '')}
+        ${printScoreBox(scoreX, rowY + row - 10, '', scoreValue || '')}${printScoreBox(scoreX + 14, rowY + row - 10, '', '')}
+      `;
+      return `
+        <g>
+          ${rowSvg(a, y, colorA, match.result.p1)}
+          ${rowSvg(b, secondY, colorB, match.result.p2)}
+        </g>
+      `;
+    }
+
+    function repBlankMatchSvg(x, y, width = 76, height = 22) {
+      const row = height / 2;
+      const scoreX = x + width - 28;
+      return `
+        <g>
+          <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#fff" stroke="#111" stroke-width="1.2"/>
+          <line x1="${x}" y1="${y + row}" x2="${x + width}" y2="${y + row}" stroke="#111" stroke-width="1.2"/>
+          <rect x="${x}" y="${y}" width="18" height="${row}" fill="#f00" stroke="#111" stroke-width="1"/>
+          <rect x="${x}" y="${y + row}" width="18" height="${row}" fill="#0584c7" stroke="#111" stroke-width="1"/>
+          <rect x="${scoreX}" y="${y}" width="14" height="${row}" fill="#fff" stroke="#111" stroke-width="1"/>
+          <rect x="${scoreX + 14}" y="${y}" width="14" height="${row}" fill="#fff" stroke="#111" stroke-width="1"/>
+          <rect x="${scoreX}" y="${y + row}" width="14" height="${row}" fill="#fff" stroke="#111" stroke-width="1"/>
+          <rect x="${scoreX + 14}" y="${y + row}" width="14" height="${row}" fill="#fff" stroke="#111" stroke-width="1"/>
+          <text x="${scoreX + 7}" y="${y + 8}" text-anchor="middle" font-size="7">P1</text>
+          <text x="${scoreX + 21}" y="${y + 8}" text-anchor="middle" font-size="7">P2</text>
+        </g>
+      `;
+    }
+
+    function printColorCellSvg(x, y, width, height, color) {
+      const fill = color || '#fff';
+      return `
+        <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${fill}" stroke="#111" stroke-width="1.1"/>
+        <line x1="${x}" y1="${y + height / 2}" x2="${x + width}" y2="${y + height / 2}" stroke="#111" stroke-width="1"/>
+      `;
+    }
+
+    function printScoreGridSvg(x, y, height, p1 = '', p2 = '') {
+      const half = height / 2;
+      const cell = height >= 26 ? 18 : 16;
+      const gridStroke = height >= 26 ? 0.75 : 0.65;
+      const labelSize = height >= 26 ? 4.8 : 4.5;
+      const valueSize = height >= 26 ? 5 : 4.7;
+      return `
+        <rect x="${x}" y="${y}" width="${cell}" height="${half}" fill="#fff" stroke="#111" stroke-width="${gridStroke}"/>
+        <rect x="${x + cell}" y="${y}" width="${cell}" height="${half}" fill="#fff" stroke="#111" stroke-width="${gridStroke}"/>
+        <rect x="${x}" y="${y + half}" width="${cell}" height="${half}" fill="#fff" stroke="#111" stroke-width="${gridStroke}"/>
+        <rect x="${x + cell}" y="${y + half}" width="${cell}" height="${half}" fill="#fff" stroke="#111" stroke-width="${gridStroke}"/>
+        <text x="${x + cell / 2}" y="${y + half - 1.3}" text-anchor="middle" font-size="${labelSize}" font-weight="700">P1</text>
+        <text x="${x + cell + cell / 2}" y="${y + half - 1.3}" text-anchor="middle" font-size="${labelSize}" font-weight="700">P2</text>
+        <text x="${x + cell / 2}" y="${y + height - 1.4}" text-anchor="middle" font-size="${valueSize}" font-weight="700">${escapeHtml(p1 || '')}</text>
+        <text x="${x + cell + cell / 2}" y="${y + height - 1.4}" text-anchor="middle" font-size="${valueSize}" font-weight="700">${escapeHtml(p2 || '')}</text>
+      `;
+    }
+
+    function printWrestlerBlockSvg(athlete, x, y, width, height, color, scoreValue = '', options = {}) {
+      const colorX = options.colorX ?? (x + 42);
+      const colorW = options.colorW ?? 38;
+      const scoreW = height >= 26 ? 36 : 32;
+      const scoreX = x + width - scoreW;
+      const clubSplit = options.clubSplit ?? (x + width - 150);
+      const showClub = options.showClub === true;
+      const nameX = colorX + colorW + 5;
+      const nameLimit = options.nameLimit ?? (width > 150 ? 31 : 10);
+      const clubLimit = options.clubLimit ?? 13;
+      const name = athlete ? athlete.name : '';
+      const drawNumber = athlete && athlete.draw ? String(athlete.draw) : '';
+      const drawCellW = Math.max(0, colorX - x);
+      const showName = options.showName !== false;
+      return `
+        <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#fff" stroke="#111" stroke-width="${options.stroke || 1.1}"/>
+        ${drawNumber && drawCellW > 4 ? `
+          <text x="${x + drawCellW / 2}" y="${y + height * 0.43}" text-anchor="middle" font-size="${options.drawFontSize || 6.4}" font-weight="800">№</text>
+          <text x="${x + drawCellW / 2}" y="${y + height - 2.2}" text-anchor="middle" font-size="${options.drawNumberFontSize || 6.4}" font-weight="800">${escapeHtml(drawNumber)}</text>
+        ` : ''}
+        ${printColorCellSvg(colorX, y, colorW, height, athlete ? color : '#fff')}
+        ${showClub ? `<line x1="${clubSplit}" y1="${y}" x2="${clubSplit}" y2="${y + height}" stroke="#111" stroke-width="0.85"/>` : ''}
+        <line x1="${scoreX}" y1="${y}" x2="${scoreX}" y2="${y + height}" stroke="#111" stroke-width="0.85"/>
+        ${showName ? `<text x="${nameX}" y="${y + height - 3.8}" font-size="${options.fontSize || 7.2}" font-weight="800">${shortSvgText(name, nameLimit)}</text>` : ''}
+        ${showClub ? `<text x="${clubSplit + 5}" y="${y + height - 4}" font-size="6.4">${shortSvgText(athlete?.club || '', clubLimit)}</text>` : ''}
+        ${printScoreGridSvg(scoreX, y, height, scoreValue || '', '')}
+      `;
+    }
+
+    function printBracketMatchSvg(match, x, y, width, height, colorA = '#f00', colorB = '#0584c7') {
+      const rowGap = width > 160 ? 4 : 3;
+      const row = (height - rowGap) / 2;
+      const y2 = y + row + rowGap;
+      const a = isAthlete(match.a) ? match.a : null;
+      const b = isAthlete(match.b) ? match.b : null;
+      return `
+        <g>
+          ${printWrestlerBlockSvg(a, x, y, width, row, colorA, match.result.p1, {
+            colorX: x + 18,
+            colorW: 18,
+            showClub: false,
+            showName: false,
+            clubSplit: Math.max(x + 45, x + width - 86),
+            nameLimit: width > 160 ? 24 : 8,
+            fontSize: width > 160 ? 7.4 : 5.8,
+            drawFontSize: 6,
+            drawNumberFontSize: 6,
+            stroke: 0.95
+          })}
+          ${printWrestlerBlockSvg(b, x, y2, width, row, colorB, match.result.p2, {
+            colorX: x + 18,
+            colorW: 18,
+            showClub: false,
+            showName: false,
+            clubSplit: Math.max(x + 45, x + width - 86),
+            nameLimit: width > 160 ? 24 : 8,
+            fontSize: width > 160 ? 7.4 : 5.8,
+            drawFontSize: 6,
+            drawNumberFontSize: 6,
+            stroke: 0.95
+          })}
+        </g>
+      `;
+    }
+
+    function printQualificationPairSvg(match, x, y, width, height, colorA = '#f00', colorB = '#0584c7') {
+      const rowGap = 2;
+      const row = (height - rowGap) / 2;
+      const secondY = y + row + rowGap;
+      const clubSplit = x + width - 155;
+      const a = isAthlete(match.a) ? match.a : null;
+      const b = isAthlete(match.b) ? match.b : null;
+      return `
+        <g>
+          ${printWrestlerBlockSvg(a, x, y, width, row, colorA, match.result.p1, {
+            colorX: x + 24,
+            colorW: 20,
+            showClub: false,
+            clubSplit,
+            nameLimit: 42,
+            clubLimit: 12,
+            fontSize: 8.4,
+            stroke: 0.95
+          })}
+          ${printWrestlerBlockSvg(b, x, secondY, width, row, colorB, match.result.p2, {
+            colorX: x + 24,
+            colorW: 20,
+            showClub: false,
+            clubSplit,
+            nameLimit: 42,
+            clubLimit: 12,
+            fontSize: 8.4,
+            stroke: 0.95
+          })}
+        </g>
+      `;
+    }
+
+    function repBlankMatchSvg(x, y, width = 76, height = 22) {
+      const row = height / 2;
+      return `
+        <g>
+          ${printWrestlerBlockSvg(null, x, y, width, row, '#f00', '', {
+            colorX: x,
+            colorW: 18,
+            showClub: false,
+            nameLimit: 8,
+            fontSize: 6,
+            stroke: 1.2
+          })}
+          ${printWrestlerBlockSvg(null, x, y + row, width, row, '#0584c7', '', {
+            colorX: x,
+            colorW: 18,
+            showClub: false,
+            nameLimit: 8,
+            fontSize: 6,
+            stroke: 1.2
+          })}
+        </g>
+      `;
+    }
+
+    function printBracketSheetHtml(comp, athletes, rounds, size) {
+      const baseY = size === 32 ? 84 : size === 16 ? 90 : 94;
+      const matchH = size === 32 ? 38 : size === 16 ? 40 : 38;
+      const baseStep = size === 32 ? 45 : size === 16 ? 64 : 86;
+      const roundXs = [8, 342, 427, 512, 596];
+      const roundWs = [322, 64, 64, 64, 126];
+      const visibleRounds = rounds;
+      const yFor = (roundIndex, matchIndex) => baseY + ((matchIndex + 0.5) * baseStep * (2 ** roundIndex)) - (matchH / 2);
+      const centerY = (roundIndex, matchIndex) => yFor(roundIndex, matchIndex) + matchH / 2;
+      const connectors = visibleRounds.slice(0, -1).map((round, roundIndex) => {
+        const x1 = roundXs[roundIndex] + roundWs[roundIndex];
+        const x2 = roundXs[roundIndex + 1] || x1 + 80;
+        const elbowX = x1 + Math.max(10, Math.min(18, (x2 - x1) / 2));
+        return (visibleRounds[roundIndex + 1] || []).map((targetMatch, targetIndex) => {
+          const firstIndex = targetIndex * 2;
+          const secondIndex = firstIndex + 1;
+          const first = round[firstIndex];
+          const second = round[secondIndex];
+          if (!targetMatch || !first || !second) return '';
+          const y1 = centerY(roundIndex, firstIndex);
+          const y2 = centerY(roundIndex, secondIndex);
+          const midY = (y1 + y2) / 2;
+          return `
+            <path d="M${x1} ${y1} H${elbowX} V${y2} H${x1}" fill="none" stroke="#111" stroke-width="1"/>
+            <path d="M${elbowX} ${midY} H${x2}" fill="none" stroke="#111" stroke-width="1"/>
+          `;
+        }).join('');
+      }).join('');
+      const roundSvg = visibleRounds.map((round, roundIndex) => {
+        const x = roundXs[roundIndex] || (roundXs[roundXs.length - 1] + 88 * (roundIndex - roundXs.length + 1));
+        const w = roundWs[roundIndex] || 64;
+        return `
+          <rect x="${x}" y="66" width="${w}" height="18" fill="#f00" stroke="#111"/>
+          <text x="${x + w / 2}" y="79" text-anchor="middle" fill="#fff" font-size="${roundIndex === 0 ? 13 : 10}" font-weight="800" letter-spacing="${roundIndex === 0 ? 6 : 0}">${escapeHtml(roundName(roundIndex, rounds.length, size))}</text>
+          ${round.map((match, matchIndex) => (
+            roundIndex === 0
+              ? printQualificationPairSvg(match, x, yFor(roundIndex, matchIndex), w, matchH, matchIndex % 2 ? '#0584c7' : '#f00', matchIndex % 2 ? '#f00' : '#0584c7')
+              : printBracketMatchSvg(match, x, yFor(roundIndex, matchIndex), w, matchH, matchIndex % 2 ? '#0584c7' : '#f00', matchIndex % 2 ? '#f00' : '#0584c7')
+          )).join('')}
+        `;
+      }).join('');
+      const emptyPrintMatch = { a: null, b: null, result: { p1: '', p2: '' } };
+      const repPools = repechagePools(athletes, rounds);
+      const repMatches = [0, 1].flatMap((poolIndex) => {
+        const matches = repPools[poolIndex] ? repechageMatchesForPool(repPools[poolIndex], poolIndex) : [];
+        const padded = [...matches];
+        while (padded.length < 5) padded.push(emptyPrintMatch);
+        return padded.slice(0, 5).map((match, matchIndex) => ({ match, poolIndex, matchIndex }));
+      });
+      const repSlot = (poolIndex, matchIndex, x, y, width, height) => {
+        const item = repMatches.find((entry) => entry.poolIndex === poolIndex && entry.matchIndex === matchIndex);
+        const match = item ? item.match : emptyPrintMatch;
+        if (isAthlete(match.a) || isAthlete(match.b)) {
+          return printBracketMatchSvg(match, x, y, width, height, '#f00', '#0584c7');
+        }
+        return repBlankMatchSvg(x, y, width, height);
+      };
+      const repConnector = (x1, y1, x2, y2) => {
+        const elbow = x1 + Math.max(8, Math.min(18, (x2 - x1) / 2));
+        return `<path d="M${x1} ${y1} H${elbow} V${y2} H${x2}" fill="none" stroke="#111" stroke-width="1"/>`;
+      };
+      const repSvg = `
+        <rect x="20" y="822" width="470" height="245" fill="#fff" stroke="#111" stroke-width="2"/>
+        <rect x="322" y="830" width="120" height="17" fill="#f00" stroke="#111"/>
+        <text x="382" y="842" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">REPEHAGE</text>
+        <rect x="304" y="848" width="154" height="17" fill="#fff" stroke="#111"/>
+        <text x="381" y="860" text-anchor="middle" fill="#e00" font-size="10" font-weight="800">REPEHAGE FİNALİSTE 1</text>
+        <rect x="304" y="956" width="154" height="17" fill="#fff" stroke="#111"/>
+        <text x="381" y="968" text-anchor="middle" fill="#e00" font-size="10" font-weight="800">REPEHAGE FİNALİSTE 2</text>
+        <!-- rollback repehage sizes: small 92x30, long 260x32 -->
+        ${repSlot(0, 0, 42, 874, 74, 30)}
+        ${repSlot(0, 1, 154, 886, 74, 30)}
+        ${repSlot(0, 2, 266, 898, 74, 30)}
+        ${repSlot(0, 3, 378, 910, 74, 30)}
+        ${repSlot(0, 4, 42, 942, 182, 32)}
+        ${repConnector(116, 889, 154, 901)}
+        ${repConnector(228, 901, 266, 913)}
+        ${repConnector(340, 913, 378, 925)}
+        ${repConnector(452, 925, 224, 958)}
+        ${repSlot(1, 0, 42, 982, 74, 30)}
+        ${repSlot(1, 1, 154, 994, 74, 30)}
+        ${repSlot(1, 2, 266, 1006, 74, 30)}
+        ${repSlot(1, 3, 378, 1018, 74, 30)}
+        ${repSlot(1, 4, 42, 1034, 182, 32)}
+        ${repConnector(116, 997, 154, 1009)}
+        ${repConnector(228, 1009, 266, 1021)}
+        ${repConnector(340, 1021, 378, 1033)}
+        ${repConnector(452, 1033, 224, 1050)}
+      `;
+      const standings = bracketStandings(athletes).slice(0, 6);
+      const labels = ['I', 'II', 'III', 'III', 'V', 'V'];
+      const standingsRows = labels.map((place, index) => {
+        const item = standings[index];
+        const y = 842 + index * 25;
+        return `<rect x="504" y="${y}" width="34" height="25" fill="#fff" stroke="#111"/><rect x="538" y="${y}" width="70" height="25" fill="#fff" stroke="#111"/><rect x="608" y="${y}" width="118" height="25" fill="#fff" stroke="#111"/><text x="521" y="${y + 17}" text-anchor="middle" font-size="14" fill="#f00" font-weight="800">${place}</text><text x="544" y="${y + 16}" font-size="8">${shortSvgText(item?.athlete?.club || '', 12)}</text><text x="614" y="${y + 16}" font-size="8">${shortSvgText(item?.athlete?.name || '', 20)}</text>`;
+      }).join('');
+      return `
+        <div class="print-bracket-sheet">
+          <svg viewBox="0 0 760 1080" role="img" aria-label="Yarışın gediş protokolu">
+            <rect x="0" y="0" width="760" height="1080" fill="#fff"/>
+            <image href="./logo1.webp" x="34" y="4" width="64" height="50" preserveAspectRatio="xMidYMid meet"/>
+            <image href="./agf.webp" x="674" y="4" width="54" height="54" preserveAspectRatio="xMidYMid meet"/>
+            <text x="395" y="30" text-anchor="middle" fill="#e00" font-size="20" font-weight="800" font-family="Georgia, serif">AZƏRBAYCAN GÜLƏŞ FEDERASİYASI</text>
+            <text x="392" y="54" text-anchor="middle" font-size="14" font-weight="800" letter-spacing="4">YARIŞIN GEDİŞ PROTOKOLU</text>
+            <text x="684" y="102" text-anchor="middle" font-size="18" font-weight="800">${state.activeWeight} kq</text>
+            ${connectors}${roundSvg}${repSvg}
+            <rect x="504" y="822" width="222" height="20" fill="#fff" stroke="#111"/><rect x="504" y="822" width="34" height="20" fill="#fff" stroke="#111"/><rect x="538" y="822" width="70" height="20" fill="#fff" stroke="#111"/>
+            <text x="521" y="836" text-anchor="middle" font-size="12" fill="#f00" font-weight="800">Yer</text><text x="573" y="836" text-anchor="middle" font-size="10" fill="#f00" font-weight="800">Komanda</text><text x="667" y="836" text-anchor="middle" font-size="11" fill="#f00" font-weight="800">Adı və Soyadı</text>
+            ${standingsRows}
+            <text x="518" y="1010" font-size="14" font-weight="800" font-style="italic">Baş hakim:</text><line x1="593" y1="1010" x2="735" y2="1010" stroke="#111"/>
+            <text x="518" y="1050" font-size="14" font-weight="800" font-style="italic">Baş katib:</text><line x1="593" y1="1050" x2="735" y2="1050" stroke="#111"/>
+          </svg>
+        </div>`;
+    }
+
+    function printBracketSheetHtmlExperimental(comp, athletes, rounds, size) {
+      const topY = 98;
+      const usableH = 640;
+      const firstCount = Math.max(1, rounds[0]?.length || size / 2);
+      const pairStep = usableH / firstCount;
+      const rowH = Math.min(17, Math.max(10, pairStep * 0.38));
+      const rowGap = Math.min(8, Math.max(4, pairStep * 0.18));
+      const pairH = rowH * 2 + rowGap;
+      const smallH = Math.min(30, Math.max(20, pairStep * 0.62));
+      const xs = [18, 335, 425, 515, 608, 676];
+      const ws = [300, 74, 74, 74, 74, 64];
+      const centers = [];
+      rounds.forEach((round, roundIndex) => {
+        if (roundIndex === 0) {
+          centers.push(round.map((_, index) => topY + index * pairStep + pairH / 2));
+          return;
+        }
+        centers.push(round.map((_, index) => {
+          const prev = centers[roundIndex - 1] || [];
+          const a = prev[index * 2];
+          const b = prev[index * 2 + 1];
+          return Number.isFinite(a) && Number.isFinite(b)
+            ? (a + b) / 2
+            : topY + index * pairStep * (2 ** roundIndex) + pairH / 2;
+        }));
+      });
+      const score = (match, side) => match?.result ? (side === 'a' ? match.result.p1 : match.result.p2) : '';
+      const label = (entry) => isAthlete(entry) ? `№${entry.draw || ''} ${entry.name}` : '';
+      const club = (entry) => isAthlete(entry) ? entry.club : '';
+      const scoreGrid = (x, y, h, value = '') => `
+        <rect x="${x}" y="${y}" width="14" height="${h / 2}" fill="#fff" stroke="#111" stroke-width="1"/>
+        <rect x="${x + 14}" y="${y}" width="14" height="${h / 2}" fill="#fff" stroke="#111" stroke-width="1"/>
+        <rect x="${x}" y="${y + h / 2}" width="14" height="${h / 2}" fill="#fff" stroke="#111" stroke-width="1"/>
+        <rect x="${x + 14}" y="${y + h / 2}" width="14" height="${h / 2}" fill="#fff" stroke="#111" stroke-width="1"/>
+        <text x="${x + 7}" y="${y + h / 2 - 2}" text-anchor="middle" font-size="7">P1</text>
+        <text x="${x + 21}" y="${y + h / 2 - 2}" text-anchor="middle" font-size="7">P2</text>
+        <text x="${x + 7}" y="${y + h - 2}" text-anchor="middle" font-size="7">${escapeHtml(value || '')}</text>
+      `;
+      const row = (entry, x, y, w, h, color, value = '') => {
+        const scoreX = x + w - 32;
+        const colorX = x + (w > 120 ? 40 : 0);
+        const colorW = w > 120 ? 28 : 14;
+        const nameX = colorX + colorW + 5;
+        const clubX = x + w - 118;
+        return `
+          <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#111" stroke-width="1.35"/>
+          <rect x="${colorX}" y="${y}" width="${colorW}" height="${h}" fill="${entry ? color : '#fff'}" stroke="#111" stroke-width="1"/>
+          ${w > 120 ? `<line x1="${clubX - 8}" y1="${y}" x2="${clubX - 8}" y2="${y + h}" stroke="#111" stroke-width="1"/>` : ''}
+          ${w > 120 ? `<line x1="${scoreX}" y1="${y}" x2="${scoreX}" y2="${y + h}" stroke="#111" stroke-width="1"/>` : ''}
+          <text x="${nameX}" y="${y + h - 4}" font-size="${w > 120 ? 8 : 6.5}" font-weight="800">${shortSvgText(label(entry), w > 120 ? 36 : 10)}</text>
+          ${w > 120 ? `<text x="${clubX}" y="${y + h - 4}" font-size="7">${shortSvgText(club(entry), 13)}</text>` : ''}
+          ${scoreGrid(scoreX, y, h, value)}
+        `;
+      };
+      const qualification = (match, index) => {
+        const y = centers[0][index] - pairH / 2;
+        const aColor = index % 2 ? '#0584c7' : '#f00';
+        const bColor = index % 2 ? '#f00' : '#0584c7';
+        return `
+          ${row(isAthlete(match?.a) ? match.a : null, xs[0], y, ws[0], rowH, aColor, score(match, 'a'))}
+          ${row(isAthlete(match?.b) ? match.b : null, xs[0], y + rowH + rowGap, ws[0], rowH, bColor, score(match, 'b'))}
+          <path d="M${xs[0] + ws[0]} ${y + rowH / 2} H${xs[0] + ws[0] + 8} V${y + rowH + rowGap + rowH / 2} H${xs[0] + ws[0]}" fill="none" stroke="#111" stroke-width="1.45"/>
+        `;
+      };
+      const matchBox = (match, roundIndex, index) => {
+        const x = xs[roundIndex] || xs[xs.length - 1];
+        const w = ws[roundIndex] || ws[ws.length - 1];
+        const y = centers[roundIndex][index] - smallH / 2;
+        const aColor = index % 2 ? '#0584c7' : '#f00';
+        const bColor = index % 2 ? '#f00' : '#0584c7';
+        return `
+          ${row(isAthlete(match?.a) ? match.a : null, x, y, w, smallH / 2, aColor, score(match, 'a'))}
+          ${row(isAthlete(match?.b) ? match.b : null, x, y + smallH / 2, w, smallH / 2, bColor, score(match, 'b'))}
+        `;
+      };
+      const connectors = rounds.slice(0, -1).map((round, roundIndex) => {
+        const sx = xs[roundIndex] + ws[roundIndex] + (roundIndex === 0 ? 8 : 0);
+        const tx = xs[roundIndex + 1];
+        const mid = sx + Math.max(8, (tx - sx) / 2);
+        return (rounds[roundIndex + 1] || []).map((_, index) => {
+          const y1 = centers[roundIndex][index * 2];
+          const y2 = centers[roundIndex][index * 2 + 1];
+          const yt = centers[roundIndex + 1][index];
+          if (!Number.isFinite(y1) || !Number.isFinite(y2) || !Number.isFinite(yt)) return '';
+          return `
+            <path d="M${sx} ${y1} H${mid} V${y2} H${sx}" fill="none" stroke="#111" stroke-width="1.35"/>
+            <path d="M${mid} ${yt} H${tx}" fill="none" stroke="#111" stroke-width="1.35"/>
+          `;
+        }).join('');
+      }).join('');
+      const titles = rounds.map((round, index) => {
+        if (!round.length) return '';
+        const title = index === 0 ? 'QUALIFICATION' : roundName(index, rounds.length, size).toUpperCase();
+        const x = xs[index] || xs[xs.length - 1];
+        const w = ws[index] || ws[ws.length - 1];
+        return `
+          <rect x="${x}" y="72" width="${w}" height="20" fill="${index === 0 ? '#f00' : '#fff'}" stroke="#111" stroke-width="1.2"/>
+          <text x="${x + w / 2}" y="86" text-anchor="middle" fill="${index === 0 ? '#fff' : '#111'}" font-size="${index === 0 ? 13 : 10}" font-weight="900" letter-spacing="${index === 0 ? 6 : 1}">${escapeHtml(title)}</text>
+        `;
+      }).join('');
+      const bracketSvg = `
+        ${titles}
+        ${connectors}
+        ${(rounds[0] || []).map(qualification).join('')}
+        ${rounds.slice(1).map((round, roundOffset) => round.map((match, index) => matchBox(match, roundOffset + 1, index)).join('')).join('')}
+      `;
+      const standings = bracketStandings(athletes).slice(0, 6);
+      const labels = ['I', 'II', 'III', 'III', 'V', 'V'];
+      const standingsRows = labels.map((place, index) => {
+        const item = standings[index];
+        const y = 842 + index * 25;
+        return `<rect x="486" y="${y}" width="40" height="25" fill="#fff" stroke="#111"/><rect x="526" y="${y}" width="78" height="25" fill="#fff" stroke="#111"/><rect x="604" y="${y}" width="130" height="25" fill="#fff" stroke="#111"/><text x="506" y="${y + 17}" text-anchor="middle" font-size="14" fill="#f00" font-weight="800">${place}</text><text x="532" y="${y + 16}" font-size="8">${shortSvgText(item?.athlete?.club || '', 13)}</text><text x="610" y="${y + 16}" font-size="8">${shortSvgText(item?.athlete?.name || '', 22)}</text>`;
+      }).join('');
+      return `
+        <div class="print-bracket-sheet">
+          <svg viewBox="0 0 760 1080" role="img" aria-label="Yarışın gediş protokolu">
+            <rect x="0" y="0" width="760" height="1080" fill="#fff"/>
+            <image href="./logo1.webp" x="48" y="8" width="70" height="54" preserveAspectRatio="xMidYMid meet"/>
+            <image href="./agf.webp" x="670" y="8" width="58" height="58" preserveAspectRatio="xMidYMid meet"/>
+            <rect x="150" y="8" width="490" height="30" fill="#fff" stroke="#111" stroke-width="1.5"/>
+            <text x="395" y="30" text-anchor="middle" fill="#e00" font-size="20" font-weight="800" font-family="Georgia, serif">AZƏRBAYCAN GÜLƏŞ FEDERASİYASI</text>
+            <rect x="195" y="50" width="395" height="20" fill="#fff" stroke="#111"/>
+            <text x="392" y="54" text-anchor="middle" font-size="14" font-weight="800" letter-spacing="4">YARIŞIN GEDİŞ PROTOKOLU</text>
+            <rect x="627" y="88" width="118" height="28" fill="#fff" stroke="#111" stroke-width="1.2"/>
+            <text x="686" y="108" text-anchor="middle" font-size="18" font-weight="800">${state.activeWeight} kq</text>
+            ${bracketSvg}
+            <rect x="40" y="822" width="430" height="210" fill="#fff" stroke="#111" stroke-width="2"/>
+            <rect x="310" y="830" width="120" height="17" fill="#f00" stroke="#111"/>
+            <text x="370" y="842" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">REPEHAGE</text>
+            <rect x="74" y="870" width="160" height="22" fill="#fff" stroke="#111"/><text x="154" y="884" text-anchor="middle" font-size="8" font-weight="800">REPEHAGE FİNALİSTE 1</text>
+            <rect x="74" y="954" width="160" height="22" fill="#fff" stroke="#111"/><text x="154" y="968" text-anchor="middle" font-size="8" font-weight="800">REPEHAGE FİNALİSTE 2</text>
+            ${repBlankMatchSvg(250, 862, 90, 28)}${repBlankMatchSvg(350, 862, 90, 28)}
+            ${repBlankMatchSvg(250, 946, 90, 28)}${repBlankMatchSvg(350, 946, 90, 28)}
+            <path d="M234 881 H250 M340 876 H350 M234 965 H250 M340 960 H350" fill="none" stroke="#111" stroke-width="1.2"/>
+            <rect x="486" y="822" width="248" height="20" fill="#fff" stroke="#111"/><rect x="486" y="822" width="40" height="20" fill="#fff" stroke="#111"/><rect x="526" y="822" width="78" height="20" fill="#fff" stroke="#111"/>
+            <text x="506" y="836" text-anchor="middle" font-size="12" fill="#f00" font-weight="800">Yer</text><text x="565" y="836" text-anchor="middle" font-size="10" fill="#f00" font-weight="800">Komanda</text><text x="669" y="836" text-anchor="middle" font-size="11" fill="#f00" font-weight="800">Adı və Soyadı</text>
+            ${standingsRows}
+            <text x="490" y="1010" font-size="14" font-weight="800" font-style="italic">Baş hakim:</text><line x1="565" y1="1010" x2="735" y2="1010" stroke="#111"/>
+            <text x="490" y="1050" font-size="14" font-weight="800" font-style="italic">Baş katib:</text><line x1="565" y1="1050" x2="735" y2="1050" stroke="#111"/>
+          </svg>
+        </div>`;
     }
 
     function overweightGroups(comp) {
@@ -2139,6 +3229,7 @@
     }
 
     function renderBracket(athletes, size) {
+      const comp = currentCompetition();
       const slots = seededSlots(athletes, size);
       const rounds = buildRounds(slots, size);
       const activeRoundIndex = clampActiveRound(rounds);
@@ -2153,6 +3244,18 @@
             <button class="${state.bracketView === 'grid' ? 'active' : ''}" data-bracket-view="grid">Sətir</button>
             <button class="${state.bracketView === 'compact' ? 'active' : ''}" data-bracket-view="compact">Kompakt</button>
           </div>
+          <div class="print-bracket-title">
+            <div class="print-bracket-logo"><img src="./logo1.webp" alt=""></div>
+            <div class="print-bracket-title-text">
+              <strong>Azərbaycan Güləş Federasiyası</strong>
+              <span>Yarışın gediş protokolu</span>
+            </div>
+            <div>
+              <div class="print-bracket-logo"><img src="./agf.webp" alt=""></div>
+              <div class="print-weight-box">${state.activeWeight} kq</div>
+            </div>
+          </div>
+          ${printBracketSheetHtml(comp, athletes, rounds, size)}
           <div class="round-jump" ${state.bracketView === 'compact' ? '' : 'hidden'}>
             ${roundInfos.map((info, index) => `
               <button class="${index === activeRoundIndex ? 'active' : ''}" ${info.enabled ? '' : 'disabled'} data-round-target="${info.id}" data-round-index="${index}">
@@ -2178,9 +3281,9 @@
           <div class="compact-view ${state.bracketEdit ? 'editing' : ''}" ${state.bracketView === 'compact' ? '' : 'hidden'}>
             ${rounds.map((round, roundIndex) => compactRoundHtml(round, roundInfos, roundIndex, activeRoundIndex)).join('')}
           </div>
-          ${renderRepechage(athletes, rounds)}
         </div>
       `;
+      $('repechageArea').innerHTML = renderRepechage(athletes, rounds);
       state.bracketRounds = rounds;
       bindViewToggle();
       bindRoundJumpButtons();
@@ -2626,7 +3729,7 @@
       const bName = entrantName(match.b);
       const aClass = match.winner && isAthlete(match.a) && match.winner.id === match.a.id ? 'winner' : (!match.a ? 'bye' : (isPending(match.a) ? 'pending' : ''));
       const bClass = match.winner && isAthlete(match.b) && match.winner.id === match.b.id ? 'winner' : (!match.b ? 'bye' : (isPending(match.b) ? 'pending' : ''));
-      const disabled = !isAthlete(match.a) || !isAthlete(match.b) ? 'disabled' : '';
+      const disabled = !match.a || !match.b ? 'disabled' : '';
       return `
         <div class="match" data-match-box="${match.id}" ${matchIndex === null ? '' : `style="--match-index:${matchIndex}"`}>
           <div class="pair">
@@ -2808,6 +3911,7 @@
           const side = event.target.dataset.side;
           comp.results[match] = comp.results[match] || { p1: '', p2: '' };
           comp.results[match][side] = event.target.value.replace(/[^\d]/g, '');
+          rememberScoreFocus(event.target);
           saveCompetitions();
           renderProtocolContent();
         });
@@ -3009,16 +4113,20 @@
       renderProtocolContent();
     });
     window.addEventListener('beforeprint', () => {
-      state.beforePrintView = state.bracketView;
-      state.bracketView = 'compact';
-      if (state.screen === 'protocol') renderProtocolContent();
+      document.body.classList.remove('print-grid', 'print-compact', 'print-list', 'print-results');
+      if (state.screen === 'protocol') {
+        if (state.protocolView === 'list') {
+          document.body.classList.add('print-list');
+        } else if (state.protocolView === 'results') {
+          document.body.classList.add('print-results');
+        } else {
+          document.body.classList.add(state.bracketView === 'grid' ? 'print-grid' : 'print-compact');
+          if (state.bracketView === 'grid') requestAnimationFrame(drawBracketConnectors);
+        }
+      }
     });
     window.addEventListener('afterprint', () => {
-      if (state.beforePrintView) {
-        state.bracketView = state.beforePrintView;
-        state.beforePrintView = null;
-        if (state.screen === 'protocol') renderProtocolContent();
-      }
+      document.body.classList.remove('print-grid', 'print-compact', 'print-list', 'print-results');
     });
     document.querySelectorAll('[data-go="home"]').forEach((button) => button.addEventListener('click', () => showScreen('home')));
 
@@ -3135,3 +4243,5 @@
   </script>
 </body>
 </html>
+
+
