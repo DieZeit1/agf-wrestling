@@ -2566,13 +2566,17 @@
     }
 
     function rememberScoreFocus(input) {
+      const scrollBox = input.closest('.bracket-wrap, .compact-view, .round-robin, .desktop-table');
       pendingScoreFocus = {
         match: input.dataset.match,
         side: input.dataset.side,
         start: input.selectionStart,
         end: input.selectionEnd,
         scrollX: window.scrollX,
-        scrollY: window.scrollY
+        scrollY: window.scrollY,
+        boxSelector: scrollBox ? scrollRestoreSelector(scrollBox) : '',
+        boxScrollLeft: scrollBox ? scrollBox.scrollLeft : 0,
+        boxScrollTop: scrollBox ? scrollBox.scrollTop : 0
       };
     }
 
@@ -2582,10 +2586,20 @@
       pendingScoreFocus = null;
       requestAnimationFrame(() => {
         window.scrollTo(focus.scrollX, focus.scrollY);
+        const scrollBox = focus.boxSelector ? document.querySelector(focus.boxSelector) : null;
+        if (scrollBox) {
+          scrollBox.scrollLeft = focus.boxScrollLeft || 0;
+          scrollBox.scrollTop = focus.boxScrollTop || 0;
+        }
         const selector = `[data-match="${cssEscape(focus.match)}"][data-side="${cssEscape(focus.side)}"]`;
         const input = document.querySelector(selector);
         if (!input) return;
         input.focus({ preventScroll: true });
+        window.scrollTo(focus.scrollX, focus.scrollY);
+        if (scrollBox) {
+          scrollBox.scrollLeft = focus.boxScrollLeft || 0;
+          scrollBox.scrollTop = focus.boxScrollTop || 0;
+        }
         if (typeof input.setSelectionRange === 'function') {
           const length = input.value.length;
           const start = Math.min(focus.start ?? length, length);
@@ -2593,6 +2607,15 @@
           input.setSelectionRange(start, end);
         }
       });
+    }
+
+    function scrollRestoreSelector(node) {
+      if (node.id) return `#${cssEscape(node.id)}`;
+      if (node.classList.contains('bracket-wrap')) return '.bracket-wrap';
+      if (node.classList.contains('compact-view')) return '.compact-view';
+      if (node.classList.contains('round-robin')) return '.round-robin';
+      if (node.classList.contains('desktop-table')) return '.desktop-table';
+      return '';
     }
 
     function cssEscape(value) {
