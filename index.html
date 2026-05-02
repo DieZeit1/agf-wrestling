@@ -313,8 +313,112 @@
 
     .weights {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
       gap: 8px;
+      position: relative;
+    }
+
+    .weight-range-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .weight-range-tab {
+      min-height: 40px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid #cddcf1;
+      box-shadow: none;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .weight-range-tab.active {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .weight-range-tab .weight-range-count {
+      min-width: 22px;
+      min-height: 22px;
+      padding: 0 7px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .weight-range-tab.active .weight-range-count {
+      color: var(--blue);
+      background: #fff;
+    }
+
+    .weight-range-panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 30;
+      border: 1px solid #cddcf1;
+      border-radius: var(--radius);
+      background: #f8fbff;
+      overflow: hidden;
+      box-shadow: 0 16px 34px rgba(8, 40, 90, 0.18);
+    }
+
+    .weight-range-panel-title {
+      min-height: 38px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .weight-range-panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .weight-select-all-btn,
+    .weight-clear-btn {
+      min-height: 30px;
+      padding: 0 10px;
+      box-shadow: none;
+      font-size: 12px;
+    }
+
+    .weight-select-all-btn {
+      color: var(--blue);
+      background: var(--blue-soft);
+      border: 1px solid #aac4e7;
+    }
+
+    .weight-clear-btn {
+      color: var(--red);
+      background: #fff0f2;
+      border: 1px solid #f1c8ce;
+    }
+
+    .weight-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+      gap: 8px;
+      padding: 10px;
     }
 
     .weight-check {
@@ -992,13 +1096,14 @@
 
     .pair {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 42px;
+      grid-template-columns: minmax(0, 1fr) minmax(64px, 0.45fr) 42px;
       gap: 4px;
       align-items: center;
       min-height: 34px;
     }
 
-    .pair span {
+    .pair span,
+    .pair-club {
       min-width: 0;
       min-height: 30px;
       display: flex;
@@ -1006,6 +1111,14 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .pair-club {
+      padding-left: 8px;
+      border-left: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
       font-weight: 700;
     }
 
@@ -1493,7 +1606,7 @@
       body.print-grid .match .pair {
         min-height: 14px;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 18px;
+        grid-template-columns: minmax(0, 1fr) minmax(22px, 0.22fr) 18px;
         gap: 2px;
         align-items: stretch;
       }
@@ -1504,6 +1617,14 @@
         text-overflow: ellipsis;
         font-size: 8.5px;
         line-height: 13px;
+      }
+      body.print-grid .pair-club {
+        min-height: 13px;
+        padding-left: 3px;
+        font-size: 7.5px;
+        line-height: 13px;
+        border-left: 1px solid #222;
+        color: #000;
       }
       body.print-grid .match input {
         width: 18px;
@@ -1928,7 +2049,14 @@
 
   <script>
     const STORE_KEY = 'agf_wrestling_competitions_v1';
-    const DEFAULT_WEIGHTS = [25, 28, 32, 36, 40, 45, 50, 55, 60, 66];
+    const DEFAULT_WEIGHTS = Array.from({ length: 51 }, (_, index) => index + 20);
+    const WEIGHT_RANGES = [
+      { label: '20-29 kg', min: 20, max: 29 },
+      { label: '30-39 kg', min: 30, max: 39 },
+      { label: '40-49 kg', min: 40, max: 49 },
+      { label: '50-59 kg', min: 50, max: 59 },
+      { label: '60-70 kg', min: 60, max: 70 }
+    ];
     const ROUND_NAMES = ['1/32 final', '1/16 final', '1/8 final', '1/4 final', 'Yarımfinal', 'Final'];
 
     const state = {
@@ -1949,6 +2077,7 @@
     };
 
     let pendingScoreFocus = null;
+    let activeWeightRangeLabel = null;
 
     const $ = (id) => document.getElementById(id);
 
@@ -2015,7 +2144,69 @@
     function renderWeights() {
       $('weightChips').innerHTML = '';
       state.availableWeights = [...new Set([...state.availableWeights, ...state.tempWeights])].sort((a, b) => a - b);
-      state.availableWeights.forEach((weight) => {
+      const root = $('weightChips');
+      const rangeItems = WEIGHT_RANGES
+        .map((range) => ({
+          ...range,
+          weights: state.availableWeights.filter((weight) => weight >= range.min && weight <= range.max)
+        }))
+        .filter((range) => range.weights.length);
+
+      const customWeights = state.availableWeights.filter((weight) => !WEIGHT_RANGES.some((range) => weight >= range.min && weight <= range.max));
+      if (customWeights.length) rangeItems.push({ label: 'Əlavə çəkilər', weights: customWeights });
+      if (!rangeItems.some((range) => range.label === activeWeightRangeLabel)) {
+        activeWeightRangeLabel = null;
+      }
+
+      const tabs = document.createElement('div');
+      tabs.className = 'weight-range-tabs';
+      rangeItems.forEach((range) => {
+        const selectedCount = range.weights.filter((weight) => state.tempWeights.includes(weight)).length;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `weight-range-tab${range.label === activeWeightRangeLabel ? ' active' : ''}`;
+        button.innerHTML = `
+          <span>${range.label}</span>
+          ${selectedCount ? `<span class="weight-range-count">${selectedCount}</span>` : ''}
+        `;
+        button.addEventListener('click', () => {
+          activeWeightRangeLabel = activeWeightRangeLabel === range.label ? null : range.label;
+          renderWeights();
+        });
+        tabs.appendChild(button);
+      });
+      root.appendChild(tabs);
+
+      const activeRange = rangeItems.find((range) => range.label === activeWeightRangeLabel) || rangeItems[0];
+      if (!activeWeightRangeLabel || !activeRange) return;
+      const activeSelectedCount = activeRange.weights.filter((weight) => state.tempWeights.includes(weight)).length;
+      const panel = document.createElement('div');
+      panel.className = 'weight-range-panel';
+      panel.innerHTML = `
+        <div class="weight-range-panel-title">
+          <span>${activeRange.label}</span>
+          <div class="weight-range-panel-actions">
+            <button class="weight-select-all-btn" type="button" ${activeSelectedCount === activeRange.weights.length ? 'disabled' : ''}>Hamısını seç</button>
+            <button class="weight-clear-btn" type="button" ${activeSelectedCount ? '' : 'disabled'}>Təmizlə</button>
+          </div>
+        </div>
+        <div class="weight-options"></div>
+      `;
+      panel.querySelector('.weight-select-all-btn').addEventListener('click', () => {
+        state.tempWeights = [...new Set([...state.tempWeights, ...activeRange.weights])].sort((a, b) => a - b);
+        renderWeights();
+      });
+      panel.querySelector('.weight-clear-btn').addEventListener('click', () => {
+        const clearSet = new Set(activeRange.weights);
+        state.tempWeights = state.tempWeights.filter((weight) => !clearSet.has(weight));
+        renderWeights();
+      });
+      const options = panel.querySelector('.weight-options');
+      activeRange.weights.forEach((weight) => options.appendChild(weightCheckbox(weight)));
+      root.appendChild(panel);
+    }
+
+    function weightCheckbox(weight) {
         const item = document.createElement('label');
         item.className = 'weight-check';
         item.innerHTML = `
@@ -2030,8 +2221,7 @@
           }
           renderWeights();
         });
-        $('weightChips').appendChild(item);
-      });
+        return item;
     }
 
     function resetSetup() {
@@ -2140,16 +2330,17 @@
         }
         const tokens = text.split(/\s+/).filter(Boolean);
         const weightIndex = tokens.findIndex((token) => {
-          const normalized = token.toLowerCase().replace('kg', '').replace(',', '.');
-          return /^\d+(\.\d+)?$/.test(normalized) && weightSet.has(String(Number(normalized)));
+          const weight = parseWeightToken(token);
+          return weight !== null && weightSet.has(String(weight));
         });
         if (weightIndex < 1) {
           errors.push(`${index + 1}-ci sətirdə çəki tapılmadı: ${original}`);
           return;
         }
-        const weight = Number(tokens[weightIndex].toLowerCase().replace('kg', '').replace(',', '.'));
+        const weight = parseWeightToken(tokens[weightIndex]);
         const before = tokens.slice(0, weightIndex);
         const after = tokens.slice(weightIndex + 1);
+        if (after.length && isWeightUnitToken(after[0])) after.shift();
         let yob = '';
         if (after.length && /^\d{4}$/.test(after[after.length - 1])) {
           yob = after.pop();
@@ -2167,6 +2358,17 @@
         });
       });
       return { athletes, errors };
+    }
+
+    function parseWeightToken(token) {
+      const match = String(token || '').trim().toLowerCase().match(/^(\d+(?:[,.]\d+)?)(?:\s*(?:kg|kq|кг))?$/i);
+      if (!match) return null;
+      const value = Number(match[1].replace(',', '.'));
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function isWeightUnitToken(token) {
+      return /^(kg|kq|кг)$/i.test(String(token || '').trim());
     }
 
     function groupedAthletes(comp) {
@@ -2266,7 +2468,12 @@
       const groups = groupedAthletes(comp);
       const root = $('weightGroups');
       root.innerHTML = '';
-      comp.weights.forEach((weight, index) => {
+      const visibleWeights = comp.weights.filter((weight) => (groups[weight] || []).length > 0);
+      if (!visibleWeights.length) {
+        root.innerHTML = '<div class="empty">Seçilmiş çəkilərdə iştirakçı tapılmadı.</div>';
+        return;
+      }
+      visibleWeights.forEach((weight, index) => {
         const section = document.createElement('section');
         section.className = `weight-section${index ? ' print-new-page' : ''}`;
         const athletes = groups[weight] || [];
@@ -2277,24 +2484,20 @@
           </div>
           ${printWeightSheetHtml(comp, weight, athletes)}
         `;
-        if (!athletes.length) {
-          section.innerHTML += '<div class="empty">Bu çəkidə iştirakçı yoxdur.</div>';
-        } else {
-          athletes.forEach((athlete) => {
-            const row = document.createElement('button');
-            row.className = `athlete-row ${athlete.draw ? 'assigned' : ''}`;
-            row.type = 'button';
-            row.innerHTML = `
-              <div>
-                <div class="athlete-name">${escapeHtml(athlete.name)}${seedLabel(athlete) ? `<span class="seed">${seedLabel(athlete)}</span>` : ''}</div>
-                <div class="meta">${escapeHtml(athlete.club)}${athlete.yob ? ` · ${athlete.yob}` : ''}</div>
-              </div>
-              <div class="draw">${athlete.draw ? `№${athlete.draw}` : 'Püşk'}</div>
-            `;
-            row.addEventListener('click', () => openDrawCard(weight, athlete.id));
-            section.appendChild(row);
-          });
-        }
+        athletes.forEach((athlete) => {
+          const row = document.createElement('button');
+          row.className = `athlete-row ${athlete.draw ? 'assigned' : ''}`;
+          row.type = 'button';
+          row.innerHTML = `
+            <div>
+              <div class="athlete-name">${escapeHtml(athlete.name)}${seedLabel(athlete) ? `<span class="seed">${seedLabel(athlete)}</span>` : ''}</div>
+              <div class="meta">${escapeHtml(athlete.club)}${athlete.yob ? ` · ${athlete.yob}` : ''}</div>
+            </div>
+            <div class="draw">${athlete.draw ? `№${athlete.draw}` : 'Püşk'}</div>
+          `;
+          row.addEventListener('click', () => openDrawCard(weight, athlete.id));
+          section.appendChild(row);
+        });
         root.appendChild(section);
       });
     }
@@ -2461,19 +2664,23 @@
       const comp = currentCompetition();
       if (!comp) return;
       comp.bracketOrders = comp.bracketOrders || {};
-      const available = comp.weights.filter((item) => comp.athletes.some((athlete) => athlete.weight === item));
-      state.activeWeight = weight || state.activeWeight || available[0] || comp.weights[0];
+      const available = nonEmptyProtocolWeights(comp);
+      state.activeWeight = weight || (available.includes(state.activeWeight) ? state.activeWeight : null) || available[0] || comp.weights[0];
       $('protocolFacts').innerHTML = factsHtml(comp, state.activeWeight);
       renderProtocolTabs();
       renderProtocolContent();
       showScreen('protocol');
     }
 
+    function nonEmptyProtocolWeights(comp) {
+      return comp.weights.filter((item) => comp.athletes.some((athlete) => athlete.weight === item));
+    }
+
     function renderProtocolTabs() {
       const comp = currentCompetition();
       const tabs = $('protocolTabs');
       tabs.innerHTML = '';
-      comp.weights.forEach((weight) => {
+      nonEmptyProtocolWeights(comp).forEach((weight) => {
         const count = comp.athletes.filter((athlete) => athlete.weight === weight).length;
         const tab = document.createElement('button');
         tab.className = `tab ${weight === state.activeWeight ? 'active' : ''}`;
@@ -2765,6 +2972,22 @@
       `;
     }
 
+    function fittedSvgText(value, maxWidth, maxFontSize, minFontSize, maxChars) {
+      const raw = String(value || '');
+      const safeWidth = Math.max(8, maxWidth || 8);
+      const floor = minFontSize || 6;
+      const ceiling = maxFontSize || 8;
+      const charsAtFloor = Math.max(1, Math.floor(safeWidth / (floor * 0.58)));
+      const limit = Math.max(1, Math.min(maxChars || raw.length || 1, charsAtFloor));
+      const clipped = raw.length > limit ? `${raw.slice(0, Math.max(1, limit - 1))}.` : raw;
+      const fitSize = safeWidth / (Math.max(clipped.length, 1) * 0.58);
+      const fontSize = Math.max(floor, Math.min(ceiling, fitSize));
+      return {
+        text: escapeHtml(clipped),
+        fontSize: Number(fontSize.toFixed(1))
+      };
+    }
+
     function printWrestlerBlockSvg(athlete, x, y, width, height, color, scoreValue = '', options = {}) {
       const colorX = options.colorX ?? (x + 42);
       const colorW = options.colorW ?? 38;
@@ -2779,6 +3002,10 @@
       const drawNumber = athlete && athlete.draw ? String(athlete.draw) : '';
       const drawCellW = Math.max(0, colorX - x);
       const showName = options.showName !== false;
+      const nameAvailable = Math.max(8, (showClub ? clubSplit : scoreX) - nameX - 5);
+      const clubAvailable = Math.max(8, scoreX - clubSplit - 8);
+      const nameFit = fittedSvgText(name, nameAvailable, options.fontSize || 7.2, options.minFontSize || 6, nameLimit);
+      const clubFit = fittedSvgText(athlete?.club || '', clubAvailable, options.clubFontSize || 6.4, options.minClubFontSize || 5.6, clubLimit);
       return `
         <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#fff" stroke="#111" stroke-width="${options.stroke || 1.1}"/>
         ${drawNumber && drawCellW > 4 ? `
@@ -2788,8 +3015,8 @@
         ${printColorCellSvg(colorX, y, colorW, height, athlete ? color : '#fff')}
         ${showClub ? `<line x1="${clubSplit}" y1="${y}" x2="${clubSplit}" y2="${y + height}" stroke="#111" stroke-width="0.85"/>` : ''}
         <line x1="${scoreX}" y1="${y}" x2="${scoreX}" y2="${y + height}" stroke="#111" stroke-width="0.85"/>
-        ${showName ? `<text x="${nameX}" y="${y + height - 3.8}" font-size="${options.fontSize || 7.2}" font-weight="800">${shortSvgText(name, nameLimit)}</text>` : ''}
-        ${showClub ? `<text x="${clubSplit + 5}" y="${y + height - 4}" font-size="6.4">${shortSvgText(athlete?.club || '', clubLimit)}</text>` : ''}
+        ${showName ? `<text x="${nameX}" y="${y + height - 3.8}" font-size="${nameFit.fontSize}" font-weight="800">${nameFit.text}</text>` : ''}
+        ${showClub ? `<text x="${clubSplit + 5}" y="${y + height - 4}" font-size="${clubFit.fontSize}">${clubFit.text}</text>` : ''}
         ${printScoreGridSvg(scoreX, y, height, scoreValue || '', '')}
       `;
     }
@@ -2834,7 +3061,9 @@
       const rowGap = 2;
       const row = (height - rowGap) / 2;
       const secondY = y + row + rowGap;
-      const clubSplit = x + width - 155;
+      const clubSplit = x + width - 105;
+      const nameFontMax = Math.min(16, Math.max(9.6, row * 0.72));
+      const clubFontMax = Math.min(12, Math.max(7.4, row * 0.55));
       const a = isAthlete(match.a) ? match.a : null;
       const b = isAthlete(match.b) ? match.b : null;
       return `
@@ -2842,21 +3071,27 @@
           ${printWrestlerBlockSvg(a, x, y, width, row, colorA, match.result.p1, {
             colorX: x + 24,
             colorW: 20,
-            showClub: false,
+            showClub: true,
             clubSplit,
-            nameLimit: 42,
-            clubLimit: 12,
-            fontSize: 8.4,
+            nameLimit: 48,
+            clubLimit: 14,
+            fontSize: nameFontMax,
+            clubFontSize: clubFontMax,
+            minFontSize: 7.2,
+            minClubFontSize: 6,
             stroke: 0.95
           })}
           ${printWrestlerBlockSvg(b, x, secondY, width, row, colorB, match.result.p2, {
             colorX: x + 24,
             colorW: 20,
-            showClub: false,
+            showClub: true,
             clubSplit,
-            nameLimit: 42,
-            clubLimit: 12,
-            fontSize: 8.4,
+            nameLimit: 48,
+            clubLimit: 14,
+            fontSize: nameFontMax,
+            clubFontSize: clubFontMax,
+            minFontSize: 7.2,
+            minClubFontSize: 6,
             stroke: 0.95
           })}
         </g>
@@ -3010,7 +3245,7 @@
         ${repConnector(340, 1021, 378, 1033)}
         ${repConnector(452, 1033, 224, 1050)}
       `;
-      const standings = bracketStandings(athletes).slice(0, 6);
+      const standings = hasCompletedResultForActiveWeight(comp) ? bracketStandings(athletes).slice(0, 6) : [];
       const labels = ['I', 'II', 'III', 'III', 'V', 'V'];
       const standingsRows = labels.map((place, index) => {
         const item = standings[index];
@@ -3030,8 +3265,8 @@
             <rect x="504" y="822" width="222" height="20" fill="#fff" stroke="#111"/><rect x="504" y="822" width="34" height="20" fill="#fff" stroke="#111"/><rect x="538" y="822" width="70" height="20" fill="#fff" stroke="#111"/>
             <text x="521" y="836" text-anchor="middle" font-size="12" fill="#f00" font-weight="800">Yer</text><text x="573" y="836" text-anchor="middle" font-size="10" fill="#f00" font-weight="800">Komanda</text><text x="667" y="836" text-anchor="middle" font-size="11" fill="#f00" font-weight="800">Adı və Soyadı</text>
             ${standingsRows}
-            <text x="518" y="1045" font-size="14" font-weight="800" font-style="italic">Baş hakim:</text><line x1="593" y1="1045" x2="735" y2="1045" stroke="#111"/>
-            <text x="518" y="1085" font-size="14" font-weight="800" font-style="italic">Baş katib:</text><line x1="593" y1="1085" x2="735" y2="1085" stroke="#111"/>
+            <text x="518" y="1018" font-size="14" font-weight="800" font-style="italic">Baş hakim:</text><line x1="593" y1="1018" x2="735" y2="1018" stroke="#111"/>
+            <text x="518" y="1058" font-size="14" font-weight="800" font-style="italic">Baş katib:</text><line x1="593" y1="1058" x2="735" y2="1058" stroke="#111"/>
           </svg>
         </div>`;
     }
@@ -3192,7 +3427,7 @@
       $('athleteTable').innerHTML = `
         <div class="desktop-table">
           <table>
-            <thead><tr><th>Püşk №</th><th>İdmançı</th><th>Klub</th><th>Təvəllüd</th><th>Səpələmə</th></tr></thead>
+            <thead><tr><th>Püşk №</th><th>İdmançı</th><th>Klub</th><th>Təvəllüd</th><th>Qeyd</th></tr></thead>
             <tbody>
               ${athletes.map((athlete, index) => `
                 <tr>
@@ -3843,6 +4078,8 @@
       if (!match.a && !match.b) return '';
       const aName = entrantName(match.a);
       const bName = entrantName(match.b);
+      const aClub = entrantClub(match.a);
+      const bClub = entrantClub(match.b);
       const aClass = match.winner && isAthlete(match.a) && match.winner.id === match.a.id ? 'winner' : (!match.a ? 'bye' : (isPending(match.a) ? 'pending' : ''));
       const bClass = match.winner && isAthlete(match.b) && match.winner.id === match.b.id ? 'winner' : (!match.b ? 'bye' : (isPending(match.b) ? 'pending' : ''));
       const disabled = !match.a || !match.b ? 'disabled' : '';
@@ -3850,10 +4087,12 @@
         <div class="match" data-match-box="${match.id}" ${matchIndex === null ? '' : `style="--match-index:${matchIndex}"`}>
           <div class="pair">
             <span class="${aClass} ${entryDragClass(match.a)}" ${entryDragAttrs(match, 'a')}>${aName}</span>
+            <div class="pair-club">${aClub}</div>
             <input ${disabled} data-match="${match.id}" data-side="p1" inputmode="numeric" value="${escapeHtml(match.result.p1)}">
           </div>
           <div class="pair">
             <span class="${bClass} ${entryDragClass(match.b)}" ${entryDragAttrs(match, 'b')}>${bName}</span>
+            <div class="pair-club">${bClub}</div>
             <input ${disabled} data-match="${match.id}" data-side="p2" inputmode="numeric" value="${escapeHtml(match.result.p2)}">
           </div>
           <div class="meta">Qalib: ${match.winner ? matchPlainName(match.winner) : ''}</div>
@@ -3893,6 +4132,10 @@
       if (isAthlete(entry)) return matchName(entry);
       if (isPending(entry)) return 'Gözlənilir';
       return '';
+    }
+
+    function entrantClub(entry) {
+      return isAthlete(entry) ? escapeHtml(entry.club || '') : '';
     }
 
     function entryDragClass(entry) {
@@ -3966,19 +4209,21 @@
     }
 
     function renderStandings(athletes) {
-      const stats = athletes.length <= 5 ? currentStandings(athletes) : bracketStandings(athletes);
+      const stats = athletes.length <= 5
+        ? currentStandings(athletes)
+        : (hasCompletedResultForActiveWeight() ? bracketStandings(athletes) : []);
       $('standingsArea').innerHTML = `
         <table>
           <thead><tr><th>YER</th><th>Püşk №</th><th>İdmançı</th><th>Klub</th><th>Qələbə</th><th>XAL</th></tr></thead>
           <tbody>
-            ${stats.map((item, index) => `
+            ${(stats.length ? stats : Array.from({ length: Math.min(6, athletes.length || 6) })).map((item, index) => `
               <tr>
                 <td>${index + 1}</td>
-                <td>${item.athlete.draw || ''}</td>
-                <td>${escapeHtml(item.athlete.name)}</td>
-                <td>${escapeHtml(item.athlete.club)}</td>
-                <td>${item.wins}</td>
-                <td>${item.xal}</td>
+                <td>${item?.athlete?.draw || ''}</td>
+                <td>${escapeHtml(item?.athlete?.name || '')}</td>
+                <td>${escapeHtml(item?.athlete?.club || '')}</td>
+                <td>${item?.wins ?? ''}</td>
+                <td>${item?.xal ?? ''}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -4054,6 +4299,18 @@
         byId[winner.id].xal += 4;
       });
       return stats;
+    }
+
+    function hasCompletedResultForActiveWeight(comp = currentCompetition()) {
+      if (!comp || !state.activeWeight) return false;
+      const needle = `_${state.activeWeight}_`;
+      return Object.entries(comp.results || {}).some(([id, result]) => (
+        id.includes(needle) &&
+        result &&
+        result.p1 !== '' &&
+        result.p2 !== '' &&
+        Number(result.p1) !== Number(result.p2)
+      ));
     }
 
     function findMatchPair(id, athletes) {
