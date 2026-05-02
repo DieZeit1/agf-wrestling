@@ -368,10 +368,12 @@
       right: 0;
       top: calc(100% + 6px);
       z-index: 30;
+      max-height: min(70vh, 360px);
       border: 1px solid #cddcf1;
       border-radius: var(--radius);
       background: #f8fbff;
-      overflow: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       box-shadow: 0 16px 34px rgba(8, 40, 90, 0.18);
     }
 
@@ -418,7 +420,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
       gap: 8px;
-      padding: 10px;
+      padding: 10px 10px 16px;
     }
 
     .weight-check {
@@ -1357,6 +1359,19 @@
       display: none;
     }
 
+    @media (max-width: 719px) {
+      .weight-options {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        padding-bottom: 22px;
+      }
+
+      .weight-check {
+        min-height: 38px;
+        padding: 0 8px;
+      }
+    }
+
     @media (min-width: 720px) {
       main { padding: 24px 18px 48px; }
       .home-grid { grid-template-columns: repeat(2, minmax(0, 240px)); }
@@ -2007,6 +2022,7 @@
             <div id="weightGroups"></div>
             <div class="toolbar weight-actions" id="weightActions">
               <button class="primary" id="createProtocolBtn">Yarış Protokolu yarat</button>
+              <button class="secondary" id="weightPdfBtn">PDF</button>
               <button class="secondary" id="autoDrawBtn">Avtomatik püşk at</button>
               <button class="secondary" id="resetDrawBtn">Püşkü sıfırla</button>
               <button class="secondary" id="backToAthletesBtn">Geri</button>
@@ -2466,6 +2482,84 @@
       `;
     }
 
+    function weightSheetSvgMarkup(comp, weight, athletes) {
+      const rowCount = Math.max(18, athletes.length);
+      const rows = Array.from({ length: rowCount }, (_, index) => athletes[index] || null);
+      const rowH = athletes.length > 24 ? 22 : athletes.length > 18 ? 24 : 29;
+      const tableX = 25;
+      const tableY = 255;
+      const headerH = 38;
+      const widths = [36, 50, 52, 265, 125, 105, 77];
+      const colX = widths.reduce((items, width, index) => {
+        items.push(index ? items[index - 1] + widths[index - 1] : tableX);
+        return items;
+      }, []);
+      const cell = (x, y, width, height, text = '', opts = {}) => `
+        <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${opts.fill || '#fff'}" stroke="#111" stroke-width="1"/>
+        ${text ? `<text x="${x + (opts.center ? width / 2 : 6)}" y="${y + height / 2 + 4}" ${opts.center ? 'text-anchor="middle"' : ''} font-size="${opts.size || 10}" font-weight="${opts.bold ? 800 : 400}">${shortSvgText(text, opts.limit || 28)}</text>` : ''}
+      `;
+      const header = [
+        cell(colX[0], tableY, widths[0], headerH, 'N', { fill: '#12a4cb', center: true, bold: true, size: 11 }),
+        cell(colX[1], tableY, widths[1], headerH, 'Püşk', { fill: '#12a4cb', center: true, bold: true, size: 10 }),
+        cell(colX[2], tableY, widths[2], headerH, 'Yarış', { fill: '#12a4cb', center: true, bold: true, size: 10 }),
+        cell(colX[3], tableY, widths[3], headerH, 'Adı və Soyadı', { fill: '#12a4cb', center: true, bold: true, size: 11 }),
+        cell(colX[4], tableY, widths[4], headerH, 'Klub', { fill: '#12a4cb', center: true, bold: true, size: 11 }),
+        cell(colX[5], tableY, widths[5], headerH, 'Doğulduğu il', { fill: '#12a4cb', center: true, bold: true, size: 10 }),
+        cell(colX[6], tableY, widths[6], headerH, 'Qeyd', { fill: '#12a4cb', center: true, bold: true, size: 11 })
+      ].join('');
+      const body = rows.map((athlete, index) => {
+        const y = tableY + headerH + index * rowH;
+        return [
+          cell(colX[0], y, widths[0], rowH, String(index + 1), { fill: '#12a4cb', center: true, bold: true, size: 10 }),
+          cell(colX[1], y, widths[1], rowH, athlete?.draw || '', { center: true, size: 10 }),
+          cell(colX[2], y, widths[2], rowH, '', { center: true, size: 10 }),
+          cell(colX[3], y, widths[3], rowH, athlete?.name || '', { size: 10, limit: 34 }),
+          cell(colX[4], y, widths[4], rowH, athlete?.club || '', { size: 10, limit: 16 }),
+          cell(colX[5], y, widths[5], rowH, athlete?.yob || '', { center: true, size: 10 }),
+          cell(colX[6], y, widths[6], rowH, '', { center: true, size: 10 })
+        ].join('');
+      }).join('');
+      return `
+        <svg viewBox="0 0 760 1110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Çəki protokolu">
+          <rect x="0" y="0" width="760" height="1110" fill="#fff"/>
+          <image href="./logo1.webp" x="48" y="32" width="92" height="88" preserveAspectRatio="xMidYMid meet"/>
+          <image href="./agf.webp" x="622" y="32" width="78" height="78" preserveAspectRatio="xMidYMid meet"/>
+          <text x="380" y="62" text-anchor="middle" font-size="23" font-weight="800">AZƏRBAYCAN GÜLƏŞ FEDERASİYASI</text>
+          <text x="380" y="98" text-anchor="middle" font-size="22" font-weight="800" letter-spacing="7">ÇƏKİ PROTOKOLU</text>
+          <text x="380" y="130" text-anchor="middle" font-size="18" font-weight="800">Çəki ${weight} kq</text>
+          <text x="25" y="176" font-size="13" font-style="italic">Yarışın adı</text>
+          <line x1="105" y1="176" x2="735" y2="176" stroke="#111"/>
+          <text x="112" y="171" font-size="12">${shortSvgText(comp.name, 78)}</text>
+          <line x1="25" y1="215" x2="310" y2="215" stroke="#111"/>
+          <line x1="450" y1="215" x2="735" y2="215" stroke="#111"/>
+          <text x="168" y="211" text-anchor="middle" font-size="12" font-weight="700">${formatDate(comp.date)}</text>
+          <text x="592" y="211" text-anchor="middle" font-size="12" font-weight="700">${shortSvgText(comp.city, 24)}</text>
+          <text x="168" y="233" text-anchor="middle" font-size="11" font-style="italic">tarix</text>
+          <text x="592" y="233" text-anchor="middle" font-size="11" font-style="italic">şəhər</text>
+          ${header}${body}
+        </svg>
+      `;
+    }
+
+    async function exportWeightProtocolPdf() {
+      const comp = currentCompetition();
+      if (!comp) return;
+      const groups = groupedAthletes(comp);
+      const visibleWeights = comp.weights.filter((weight) => (groups[weight] || []).length > 0);
+      if (!visibleWeights.length) {
+        $('weightStatus').textContent = 'PDF üçün iştirakçı olan çəki tapılmadı.';
+        return;
+      }
+      try {
+        const pages = await Promise.all(visibleWeights.map((weight) => svgMarkupToPdfImage(weightSheetSvgMarkup(comp, weight, groups[weight] || []))));
+        const pdfBytes = createImagePdf(pages);
+        downloadBlob(new Blob([pdfBytes], { type: 'application/pdf' }), safeFileName(`${comp.name || 'yarish'}-ceki-protokolu.pdf`));
+      } catch (error) {
+        console.error(error);
+        $('weightStatus').textContent = 'PDF yaratmaq mümkün olmadı. Çap düyməsi əvvəlki kimi işləyir.';
+      }
+    }
+
     function renderWeightProtocol() {
       const comp = currentCompetition();
       if (!comp) return;
@@ -2803,6 +2897,11 @@
     }
 
     async function svgElementToA4Pdf(svgElement) {
+      const pdfImage = await svgElementToPdfImage(svgElement);
+      return createImagePdf([pdfImage]);
+    }
+
+    async function svgElementToPdfImage(svgElement) {
       const clone = svgElement.cloneNode(true);
       clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
@@ -2821,7 +2920,14 @@
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       const jpegBytes = dataUrlToBytes(canvas.toDataURL('image/jpeg', 0.96));
-      return createSingleImagePdf(jpegBytes, canvas.width, canvas.height);
+      return { bytes: jpegBytes, width: canvas.width, height: canvas.height };
+    }
+
+    async function svgMarkupToPdfImage(svgMarkup) {
+      const parsed = new DOMParser().parseFromString(svgMarkup, 'image/svg+xml');
+      const svg = parsed.documentElement;
+      if (!svg || svg.nodeName.toLowerCase() !== 'svg') throw new Error('Invalid SVG');
+      return svgElementToPdfImage(svg);
     }
 
     async function inlineSvgImages(svgElement) {
@@ -2871,6 +2977,10 @@
     }
 
     function createSingleImagePdf(imageBytes, imageWidth, imageHeight) {
+      return createImagePdf([{ bytes: imageBytes, width: imageWidth, height: imageHeight }]);
+    }
+
+    function createImagePdf(images) {
       const encoder = new TextEncoder();
       const parts = [];
       const offsets = [];
@@ -2883,6 +2993,8 @@
         parts.push(bytes);
         return bytes.length;
       };
+      const pageW = 595.28;
+      const pageH = 841.89;
       let length = addText('%PDF-1.4\n');
       const addObject = (id, bodyBytes) => {
         offsets[id] = length;
@@ -2890,23 +3002,32 @@
         length += addBytes(bodyBytes);
         length += addText('\nendobj\n');
       };
-      const pageW = 595.28;
-      const pageH = 841.89;
-      const content = `q\n${pageW} 0 0 ${pageH} 0 0 cm\n/Im1 Do\nQ\n`;
-      const imageHeader = encoder.encode(`<< /Type /XObject /Subtype /Image /Width ${imageWidth} /Height ${imageHeight} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imageBytes.length} >>\nstream\n`);
-      const imageFooter = encoder.encode('\nendstream');
-      const imageObject = new Uint8Array(imageHeader.length + imageBytes.length + imageFooter.length);
-      imageObject.set(imageHeader, 0);
-      imageObject.set(imageBytes, imageHeader.length);
-      imageObject.set(imageFooter, imageHeader.length + imageBytes.length);
+      const pageIds = images.map((_, index) => 3 + index * 3);
       addObject(1, encoder.encode('<< /Type /Catalog /Pages 2 0 R >>'));
-      addObject(2, encoder.encode('<< /Type /Pages /Kids [3 0 R] /Count 1 >>'));
-      addObject(3, encoder.encode(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>`));
-      addObject(4, imageObject);
-      addObject(5, encoder.encode(`<< /Length ${encoder.encode(content).length} >>\nstream\n${content}endstream`));
+      addObject(2, encoder.encode(`<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(' ')}] /Count ${images.length} >>`));
+      images.forEach((image, index) => {
+        const pageId = 3 + index * 3;
+        const imageId = pageId + 1;
+        const contentId = pageId + 2;
+        const imageHeader = encoder.encode(`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.bytes.length} >>\nstream\n`);
+        const imageFooter = encoder.encode('\nendstream');
+        const imageObject = new Uint8Array(imageHeader.length + image.bytes.length + imageFooter.length);
+        imageObject.set(imageHeader, 0);
+        imageObject.set(image.bytes, imageHeader.length);
+        imageObject.set(imageFooter, imageHeader.length + image.bytes.length);
+        const imageName = `Im${index + 1}`;
+        const content = `q\n${pageW} 0 0 ${pageH} 0 0 cm\n/${imageName} Do\nQ\n`;
+        addObject(pageId, encoder.encode(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /${imageName} ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`));
+        addObject(imageId, imageObject);
+        addObject(contentId, encoder.encode(`<< /Length ${encoder.encode(content).length} >>\nstream\n${content}endstream`));
+      });
       const xrefOffset = length;
-      length += addText(`xref\n0 6\n0000000000 65535 f \n${[1, 2, 3, 4, 5].map((id) => `${String(offsets[id]).padStart(10, '0')} 00000 n `).join('\n')}\n`);
-      length += addText(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+      const maxId = 2 + images.length * 3;
+      const entries = Array.from({ length: maxId }, (_, index) => index + 1)
+        .map((id) => `${String(offsets[id]).padStart(10, '0')} 00000 n `)
+        .join('\n');
+      length += addText(`xref\n0 ${maxId + 1}\n0000000000 65535 f \n${entries}\n`);
+      length += addText(`trailer\n<< /Size ${maxId + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
       const pdf = new Uint8Array(length);
       let offset = 0;
       parts.forEach((part) => {
@@ -4654,6 +4775,7 @@
 
     $('autoDrawBtn').addEventListener('click', autoAssignDraws);
     $('resetDrawBtn').addEventListener('click', resetDraws);
+    $('weightPdfBtn').addEventListener('click', exportWeightProtocolPdf);
     $('jumpWeightBottomBtn').addEventListener('click', () => {
       $('weightActions').scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
