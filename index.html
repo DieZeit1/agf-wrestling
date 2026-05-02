@@ -89,6 +89,8 @@
     .mark {
       width: 42px;
       height: 42px;
+      min-height: 42px;
+      padding: 0;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.32);
       display: grid;
@@ -96,7 +98,12 @@
       font-weight: 800;
       letter-spacing: 0;
       background: rgba(255,255,255,0.08);
+      color: #fff;
       flex: 0 0 auto;
+    }
+
+    .mark:hover {
+      background: rgba(255,255,255,0.16);
     }
 
     .brand {
@@ -139,7 +146,7 @@
       border: 1px solid rgba(255,255,255,0.18);
     }
 
-    .test-fill-btn {
+    .utility-icon-btn {
       background: #fff8e8;
       color: var(--blue);
       border: 1px solid var(--score-border);
@@ -351,6 +358,33 @@
       gap: 8px;
       align-items: center;
       margin-top: 14px;
+    }
+
+    .weight-actions {
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .weight-actions button {
+      min-height: 40px;
+      padding: 0 12px;
+      box-shadow: none;
+    }
+
+    .weight-actions .primary {
+      flex: 0 1 auto;
+    }
+
+    .jump-bottom {
+      min-width: 40px;
+      min-height: 36px;
+      padding: 0 10px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      font-size: 18px;
+      line-height: 1;
     }
 
     .hint {
@@ -838,7 +872,8 @@
       z-index: 1;
     }
 
-    .bracket.editing .match-entry {
+    .bracket.editing .match-entry,
+    .compact-view.editing .match-entry {
       cursor: grab;
       outline: 2px dashed var(--gold);
       outline-offset: 2px;
@@ -850,25 +885,40 @@
       width: 100%;
     }
 
-    .bracket.editing .match-entry[draggable="true"]:active {
+    .bracket.editing .match-entry[draggable="true"]:active,
+    .compact-view.editing .match-entry[draggable="true"]:active {
       cursor: grabbing;
     }
 
-    .bracket.editing .match-entry.drop-hover {
+    .bracket.editing .match-entry.drop-hover,
+    .compact-view.editing .match-entry.drop-hover {
       outline-color: var(--blue);
       background: #fff7da;
     }
 
-    .bracket.editing .match-entry.selected {
+    .bracket.editing .match-entry.selected,
+    .compact-view.editing .match-entry.selected {
       outline: 3px solid var(--blue);
       background: #e8f1ff;
       color: var(--blue);
     }
 
-    .bracket.editing .match-entry.empty-drop {
+    .bracket.editing .match-entry.empty-drop,
+    .compact-view.editing .match-entry.empty-drop {
       min-height: 28px;
       border-radius: 6px;
       background: #fffdf5;
+    }
+
+    .compact-view.editing {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,154,46,0.16);
+    }
+
+    .compact-view.editing h3 {
+      background: #fff8e8;
+      color: #071a3d;
+      border-bottom-color: var(--gold);
     }
 
     #editBracketBtn.active {
@@ -1241,8 +1291,15 @@
       main { width: 100%; padding: 0; }
       .screen { display: none !important; }
       .screen.print-target { display: block !important; }
+      body.print-grid html,
+      body.print-grid body {
+        height: 100%;
+        overflow: hidden;
+      }
       body.print-grid #protocolScreen {
         page: bracket-sheet;
+        height: 289mm;
+        overflow: hidden;
       }
       @page bracket-sheet {
         size: A4;
@@ -1288,6 +1345,8 @@
       body.print-grid .print-bracket-sheet {
         display: block !important;
         width: 100%;
+        height: 286mm;
+        overflow: hidden;
         break-inside: avoid;
         page-break-inside: avoid;
       }
@@ -1295,7 +1354,7 @@
         display: block;
         width: 100%;
         height: auto;
-        max-height: 288mm;
+        max-height: 284mm;
       }
       body.print-grid .protocol-header,
       body.print-grid #protocolContent > .panel > .panel-head,
@@ -1336,6 +1395,7 @@
         grid-column: 1 / -1;
         break-before: auto;
         page-break-before: auto;
+        overflow: hidden;
       }
       body.print-grid .print-bracket-title {
         display: grid;
@@ -1705,7 +1765,7 @@
   <div class="app">
     <header class="topbar no-print">
       <div class="topbar-inner">
-        <div class="mark">AGF</div>
+        <button class="mark" id="homeMarkBtn" type="button" title="Əsas səhifə">AGF</button>
         <div class="brand">
           <strong>Azərbaycan Güləş Federasiyası</strong>
           <span>Offline yarış protokolu</span>
@@ -1811,6 +1871,7 @@
         <div class="panel">
           <div class="panel-head">
             <h2>Çəki Protokolu</h2>
+            <button class="jump-bottom no-print" id="jumpWeightBottomBtn" type="button" title="Aşağı">↓</button>
           </div>
           <div class="panel-body">
             <div class="protocol-header">
@@ -1818,7 +1879,7 @@
               <div class="protocol-facts" id="weightProtocolFacts"></div>
             </div>
             <div id="weightGroups"></div>
-            <div class="toolbar">
+            <div class="toolbar weight-actions" id="weightActions">
               <button class="primary" id="createProtocolBtn">Yarış Protokolu yarat</button>
               <button class="secondary" id="autoDrawBtn">Avtomatik püşk at</button>
               <button class="secondary" id="resetDrawBtn">Püşkü sıfırla</button>
@@ -1835,9 +1896,7 @@
           <div class="protocol-facts" id="protocolFacts"></div>
         </div>
         <div class="segmented no-print" id="protocolTabs"></div>
-        <div class="toolbar no-print">
-          <button class="icon-btn test-fill-btn" id="fillTestResultsBtn" title="Test nəticələri doldur">T</button>
-        </div>
+        <div class="toolbar no-print" id="protocolTools"></div>
         <div id="protocolContent"></div>
       </section>
     </main>
@@ -2805,12 +2864,46 @@
       `;
     }
 
+    function printBracketLayout(size) {
+      if (size <= 8) {
+        return {
+          baseY: 100,
+          matchH: 76,
+          baseStep: 165,
+          roundXs: [18, 420, 590],
+          roundWs: [380, 104, 128],
+          titleY: 74,
+          titleH: 22,
+          titleFont: [14, 11]
+        };
+      }
+      if (size <= 16) {
+        return {
+          baseY: 92,
+          matchH: 50,
+          baseStep: 78,
+          roundXs: [8, 388, 510, 622],
+          roundWs: [360, 88, 88, 108],
+          titleY: 66,
+          titleH: 20,
+          titleFont: [14, 10]
+        };
+      }
+      return {
+        baseY: 84,
+        matchH: 38,
+        baseStep: 45,
+        roundXs: [8, 342, 427, 512, 596],
+        roundWs: [322, 64, 64, 64, 126],
+        titleY: 66,
+        titleH: 18,
+        titleFont: [13, 10]
+      };
+    }
+
     function printBracketSheetHtml(comp, athletes, rounds, size) {
-      const baseY = size === 32 ? 84 : size === 16 ? 90 : 94;
-      const matchH = size === 32 ? 38 : size === 16 ? 40 : 38;
-      const baseStep = size === 32 ? 45 : size === 16 ? 64 : 86;
-      const roundXs = [8, 342, 427, 512, 596];
-      const roundWs = [322, 64, 64, 64, 126];
+      const layout = printBracketLayout(size);
+      const { baseY, matchH, baseStep, roundXs, roundWs, titleY, titleH, titleFont } = layout;
       const visibleRounds = rounds;
       const yFor = (roundIndex, matchIndex) => baseY + ((matchIndex + 0.5) * baseStep * (2 ** roundIndex)) - (matchH / 2);
       const centerY = (roundIndex, matchIndex) => yFor(roundIndex, matchIndex) + matchH / 2;
@@ -2837,8 +2930,8 @@
         const x = roundXs[roundIndex] || (roundXs[roundXs.length - 1] + 88 * (roundIndex - roundXs.length + 1));
         const w = roundWs[roundIndex] || 64;
         return `
-          <rect x="${x}" y="66" width="${w}" height="18" fill="#f00" stroke="#111"/>
-          <text x="${x + w / 2}" y="79" text-anchor="middle" fill="#fff" font-size="${roundIndex === 0 ? 13 : 10}" font-weight="800" letter-spacing="${roundIndex === 0 ? 6 : 0}">${escapeHtml(roundName(roundIndex, rounds.length, size))}</text>
+          <rect x="${x}" y="${titleY}" width="${w}" height="${titleH}" fill="#f00" stroke="#111"/>
+          <text x="${x + w / 2}" y="${titleY + titleH - 5}" text-anchor="middle" fill="#fff" font-size="${roundIndex === 0 ? titleFont[0] : titleFont[1]}" font-weight="800" letter-spacing="${roundIndex === 0 ? 6 : 0}">${escapeHtml(roundName(roundIndex, rounds.length, size))}</text>
           ${round.map((match, matchIndex) => (
             roundIndex === 0
               ? printQualificationPairSvg(match, x, yFor(roundIndex, matchIndex), w, matchH, matchIndex % 2 ? '#0584c7' : '#f00', matchIndex % 2 ? '#f00' : '#0584c7')
@@ -2903,8 +2996,8 @@
       }).join('');
       return `
         <div class="print-bracket-sheet">
-          <svg viewBox="0 0 760 1080" role="img" aria-label="Yarışın gediş protokolu">
-            <rect x="0" y="0" width="760" height="1080" fill="#fff"/>
+          <svg viewBox="0 0 760 1110" role="img" aria-label="Yarışın gediş protokolu">
+            <rect x="0" y="0" width="760" height="1110" fill="#fff"/>
             <image href="./logo1.webp" x="34" y="4" width="64" height="50" preserveAspectRatio="xMidYMid meet"/>
             <image href="./agf.webp" x="674" y="4" width="54" height="54" preserveAspectRatio="xMidYMid meet"/>
             <text x="395" y="30" text-anchor="middle" fill="#e00" font-size="20" font-weight="800" font-family="Georgia, serif">AZƏRBAYCAN GÜLƏŞ FEDERASİYASI</text>
@@ -2914,8 +3007,8 @@
             <rect x="504" y="822" width="222" height="20" fill="#fff" stroke="#111"/><rect x="504" y="822" width="34" height="20" fill="#fff" stroke="#111"/><rect x="538" y="822" width="70" height="20" fill="#fff" stroke="#111"/>
             <text x="521" y="836" text-anchor="middle" font-size="12" fill="#f00" font-weight="800">Yer</text><text x="573" y="836" text-anchor="middle" font-size="10" fill="#f00" font-weight="800">Komanda</text><text x="667" y="836" text-anchor="middle" font-size="11" fill="#f00" font-weight="800">Adı və Soyadı</text>
             ${standingsRows}
-            <text x="518" y="1010" font-size="14" font-weight="800" font-style="italic">Baş hakim:</text><line x1="593" y1="1010" x2="735" y2="1010" stroke="#111"/>
-            <text x="518" y="1050" font-size="14" font-weight="800" font-style="italic">Baş katib:</text><line x1="593" y1="1050" x2="735" y2="1050" stroke="#111"/>
+            <text x="518" y="1045" font-size="14" font-weight="800" font-style="italic">Baş hakim:</text><line x1="593" y1="1045" x2="735" y2="1045" stroke="#111"/>
+            <text x="518" y="1085" font-size="14" font-weight="800" font-style="italic">Baş katib:</text><line x1="593" y1="1085" x2="735" y2="1085" stroke="#111"/>
           </svg>
         </div>`;
     }
@@ -3812,95 +3905,11 @@
       return comp.results[id] || { p1: '', p2: '' };
     }
 
-    function fillTestResults() {
-      const comp = currentCompetition();
-      if (!comp || !state.activeWeight) return;
-      const athletes = orderForBracket(comp.athletes.filter((athlete) => athlete.weight === state.activeWeight));
-      if (athletes.length < 2) return;
-      clearActiveWeightResults(comp);
-      if (athletes.length <= 5) {
-        fillRoundRobinTestResults(comp, athletes);
-      } else {
-        fillBracketTestResults(comp, athletes);
-      }
-      saveCompetitions();
-      renderProtocolContent();
-    }
-
     function clearActiveWeightResults(comp) {
       const needle = `_${state.activeWeight}_`;
       Object.keys(comp.results).forEach((id) => {
         if (id.includes(needle)) delete comp.results[id];
       });
-    }
-
-    function fillRoundRobinTestResults(comp, athletes) {
-      const rounds = roundRobinRounds(athletes);
-      rounds.forEach((round, roundIndex) => {
-        round.forEach(([a, b], matchIndex) => {
-          if (!a || !b) return;
-          const id = `rr_${state.activeWeight}_${roundIndex}_${matchIndex}`;
-          comp.results[id] = randomScore(roundIndex + matchIndex);
-        });
-      });
-    }
-
-    function fillBracketTestResults(comp, athletes) {
-      const size = bracketSizeFor(athletes.length);
-      const slots = seededSlots(athletes, size);
-      let entrants = slots;
-      let roundNumber = 0;
-      while (entrants.length > 1) {
-        const next = [];
-        for (let i = 0; i < entrants.length; i += 2) {
-          const a = entrants[i];
-          const b = entrants[i + 1];
-          const id = `br_${state.activeWeight}_${size}_${roundNumber}_${i / 2}`;
-          if (a && b) {
-            const winnerSide = randomSide();
-            comp.results[id] = scoreForWinner(winnerSide, roundNumber + i + Math.floor(Math.random() * 5));
-            next.push(winnerSide === 'p1' ? a : b);
-          } else {
-            next.push(a || b || null);
-          }
-        }
-        entrants = next;
-        roundNumber += 1;
-      }
-      const rounds = buildRounds(slots, size);
-      fillRepechageTestResults(comp, athletes, rounds);
-    }
-
-    function fillRepechageTestResults(comp, athletes, rounds) {
-      repechagePools(athletes, rounds).forEach((pool, poolIndex) => {
-        let current = null;
-        pool.losers.forEach((athlete, index) => {
-          if (!current) {
-            current = athlete;
-            return;
-          }
-          const id = `rep_${state.activeWeight}_${poolIndex}_${index - 1}`;
-          const winnerSide = randomSide();
-          comp.results[id] = scoreForWinner(winnerSide, poolIndex + index + Math.floor(Math.random() * 5));
-          current = winnerSide === 'p1' ? current : athlete;
-        });
-      });
-    }
-
-    function scoreForWinner(side, seed) {
-      const winnerScore = 4 + (seed % 4);
-      const loserScore = seed % 3;
-      return side === 'p1'
-        ? { p1: String(winnerScore), p2: String(loserScore) }
-        : { p1: String(loserScore), p2: String(winnerScore) };
-    }
-
-    function randomSide() {
-      return Math.random() < 0.5 ? 'p1' : 'p2';
-    }
-
-    function randomScore(seed) {
-      return scoreForWinner(randomSide(), seed + Math.floor(Math.random() * 5));
     }
 
     function bindScoreInputs(root = document) {
@@ -4091,20 +4100,23 @@
 
     $('newCompetitionBtn').addEventListener('click', resetSetup);
     $('newFromListBtn').addEventListener('click', resetSetup);
+    $('homeMarkBtn').addEventListener('click', () => {
+      state.history = [];
+      showScreen('home', { replace: true });
+    });
     $('competitionsBtn').addEventListener('click', () => {
       renderCompetitionList();
       showScreen('list');
     });
     $('backNavBtn').addEventListener('click', goBack);
     $('printBtn').addEventListener('click', () => window.print());
-    $('fillTestResultsBtn').addEventListener('click', fillTestResults);
     const editBracketBtn = document.createElement('button');
-    editBracketBtn.className = 'icon-btn test-fill-btn';
+    editBracketBtn.className = 'icon-btn utility-icon-btn';
     editBracketBtn.id = 'editBracketBtn';
     editBracketBtn.type = 'button';
     editBracketBtn.title = 'Sətiri əl ilə düzəlt';
     editBracketBtn.textContent = '↕';
-    $('fillTestResultsBtn').before(editBracketBtn);
+    $('protocolTools').appendChild(editBracketBtn);
     editBracketBtn.addEventListener('click', () => {
       state.bracketEdit = !state.bracketEdit;
       state.selectedEntry = null;
@@ -4200,6 +4212,9 @@
 
     $('autoDrawBtn').addEventListener('click', autoAssignDraws);
     $('resetDrawBtn').addEventListener('click', resetDraws);
+    $('jumpWeightBottomBtn').addEventListener('click', () => {
+      $('weightActions').scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
     $('createProtocolBtn').addEventListener('click', () => {
       const comp = currentCompetition();
       const tooMany = comp ? overweightGroups(comp) : [];
