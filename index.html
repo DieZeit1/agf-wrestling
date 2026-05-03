@@ -1974,6 +1974,9 @@
           <div class="home-grid">
             <button class="primary" id="newCompetitionBtn">Yeni Yarış</button>
             <button class="secondary" id="competitionsBtn">Yarışlar</button>
+            <button class="ghost" id="exportBtn" type="button">Bazanı yüklə (Export)</button>
+            <button class="ghost" id="importBtn" type="button">Fayldan bərpa et (Import)</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none">
           </div>
         </div>
       </section>
@@ -5153,6 +5156,49 @@
         renderCompetitionList();
       }
     });
+
+    // --- BACKUP LOGIC ---
+    $('exportBtn').onclick = () => {
+      const data = {
+        competitions: state.competitions,
+        version: '1.0',
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `wrestling_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+
+    $('importBtn').onclick = () => $('importFileInput').click();
+
+    $('importFileInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!confirm('Bütün mövcud yarışlar silinəcək və fayldan bərpa olunacaq. Əminsiniz?')) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          if (data.competitions) {
+            state.competitions = data.competitions;
+            saveCompetitions();
+            alert('Məlumatlar uğurla bərpa olundu!');
+            window.location.reload();
+          } else {
+            alert('Fayl formatı düzgün deyil.');
+          }
+        } catch (err) {
+          alert('Fayl oxunarkən xəta baş verdi.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    // ----------------------
 
     installPwaBits();
     renderWeights();
